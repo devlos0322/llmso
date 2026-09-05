@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="ko"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LLMSO — LLM 서빙과 최적화 스터디</title>
+<style>
+:root{--bg:#fff;--panel:#f7f9fc;--panel2:#eef2f7;--line:#dfe5ee;--tx:#1b2432;--mut:#5a6675;--dim:#8a94a3;--a:#2563eb}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);
+ font:400 16px/1.75 -apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Segoe UI",Roboto,sans-serif;
+ -webkit-font-smoothing:antialiased}
+.wrap{max-width:1040px;margin:0 auto;padding:0 20px}
+header{padding:76px 0 40px;border-bottom:1px solid var(--line)}
+.brand{font-size:12.5px;font-weight:700;letter-spacing:.14em;color:var(--a);margin-bottom:14px}
+h1{margin:0 0 16px;font-size:40px;line-height:1.25;letter-spacing:-.03em;font-weight:800}
+h1 em{font-style:normal;color:var(--a)}
+.lead{margin:0;font-size:17px;color:var(--mut);max-width:62ch}
+.meta{margin-top:26px;display:flex;flex-wrap:wrap;gap:10px}
+.chip{font-size:12.5px;font-weight:600;color:var(--mut);background:var(--panel2);
+ border:1px solid var(--line);border-radius:999px;padding:5px 12px}
+.resume{margin-top:22px}
+.resume a{display:none;align-items:center;gap:8px;text-decoration:none;background:var(--a);color:#fff;
+ font-weight:700;font-size:14px;border-radius:10px;padding:11px 18px}
+.wk{padding:46px 0;border-bottom:1px solid var(--line)}
+.wkh{margin-bottom:22px}
+.wkb{display:inline-block;font-size:11.5px;font-weight:700;letter-spacing:.08em;color:var(--a);
+ background:#eaf1fe;border-radius:999px;padding:3px 11px;margin-bottom:10px}
+.wkh h2{margin:0 0 6px;font-size:23px;letter-spacing:-.02em;font-weight:800}
+.wkh p{margin:0;color:var(--dim);font-size:14.5px;max-width:64ch}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:14px}
+.card{display:block;text-decoration:none;color:inherit;background:var(--panel);
+ border:1px solid var(--line);border-radius:14px;padding:18px 19px;transition:.14s}
+.card:hover{background:#fff;border-color:var(--a);transform:translateY(-2px);
+ box-shadow:0 6px 22px rgba(37,99,235,.09)}
+.ctop{display:flex;justify-content:space-between;align-items:center;margin-bottom:11px}
+.num{font-size:11.5px;font-weight:800;letter-spacing:.06em;color:var(--a)}
+.rt{font-size:11.5px;color:var(--dim)}
+.ttl{font-size:17px;font-weight:750;letter-spacing:-.02em;margin-bottom:5px}
+.sub{font-size:14px;color:var(--a);margin-bottom:9px;font-weight:500}
+.dsc{font-size:13.5px;line-height:1.65;color:var(--mut)}
+.note{padding:40px 0 80px;color:var(--dim);font-size:13.5px}
+.note b{color:var(--mut)}
+.note code{background:var(--panel2);border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:12.5px}
+@media(max-width:640px){h1{font-size:30px} header{padding:52px 0 32px} .grid{grid-template-columns:1fr}}
+</style></head>
+<body>
+<div class="wrap">
+<header>
+  <div class="brand">LLM SERVING &amp; OPTIMIZATION</div>
+  <h1>학습이 끝난 모델을<br><em>진짜 서비스</em>로 만드는 일.</h1>
+  <p class="lead">모델 서빙 기초부터 KV 캐시·PagedAttention·양자화·분산 추론까지.
+     수식을 증명하지 않고 <b>어디서 시간이 새는지</b>만 봅니다. 그림은 전부 직접 조작할 수 있습니다.</p>
+  <div class="meta">
+    <span class="chip">전 12편</span>
+    <span class="chip">5주 과정</span>
+    <span class="chip">읽는 시간 약 7시간 5분</span>
+    <span class="chip">인터랙티브 그림 260+</span>
+    <span class="chip">확인 퀴즈 160문항</span>
+  </div>
+  <div class="resume"><a id="resume" href="#">이어 읽기 →</a></div>
+</header>
+  <section class="wk">
+    <div class="wkh"><span class="wkb">사전</span><h2>시작하기 전에</h2><p>Transformer가 어떻게 동작하는지 모르면 이후 최적화 이야기가 전부 공중에 뜬다.</p></div>
+    <div class="grid">
+    <a class="card" href="00-llm-fundamentals.html">
+      <div class="ctop"><span class="num">기초</span><span class="rt">약 50분</span></div>
+      <div class="ttl">LLM 기초와 동작 원리</div>
+      <div class="sub">숫자 몇 개가 말을 하게 되기까지</div>
+      <div class="dsc">신경망의 가중치 하나에서 GPT-2 Small(124M) 해부까지. 역전파, GPU가 왜 필요한지, 토큰 임베딩과 위치 인코딩, Self-Attention의 Q·K·V.</div>
+    </a>
+    <a class="card" href="00b-math-foundations.html">
+      <div class="ctop"><span class="num">기초</span></div>
+      <div class="ttl">트랜스포머를 위한 최소한의 수학</div>
+      <div class="sub">벡터 · 내적 · 사원수 — 천천히, 그림으로</div>
+      <div class="dsc">벡터와 행렬, 회전과 복소수·사원수, 내적과 외적에서 출발해 어텐션·RoPE·softmax·경사하강법까지 연결한다.</div>
+    </a>
+    </div>
+  </section>
+  <section class="wk">
+    <div class="wkh"><span class="wkb">1주차</span><h2>서빙이란 무엇인가</h2><p>모델은 파일이 아니라 소프트웨어다. 그리고 토큰은 하나씩 나온다.</p></div>
+    <div class="grid">
+    <a class="card" href="01-model-serving-intro.html">
+      <div class="ctop"><span class="num">CH1</span><span class="rt">약 40분</span></div>
+      <div class="ttl">CH1 모델 서빙과 최적화 입문</div>
+      <div class="sub">학습이 끝난 모델을 진짜 서비스로 만드는 일</div>
+      <div class="dsc">모델은 세 덩어리로 된 소프트웨어라는 데서 출발해 생명주기·TTFT·TPOT·삼각 트레이드오프, 그리고 서빙 방식 네 가지.</div>
+    </a>
+    <a class="card" href="02-llm-serving.html">
+      <div class="ctop"><span class="num">CH2</span><span class="rt">약 45분</span></div>
+      <div class="ttl">CH2 LLM 서빙</div>
+      <div class="sub">토큰 하나가 나오기까지 안에서 벌어지는 일</div>
+      <div class="dsc">자기회귀 생성, Decoder-Only 3단 구조, KV 캐시가 무엇을 아끼는지, prefill과 decode의 병목 차이, PagedAttention·스트리밍·배칭.</div>
+    </a>
+    </div>
+  </section>
+  <section class="wk">
+    <div class="wkh"><span class="wkb">2주차</span><h2>시스템으로 만들기</h2><p>추론하는 부품은 하나뿐이고, 나머지는 그 하나를 놀지 않게 하려고 있다.</p></div>
+    <div class="grid">
+    <a class="card" href="03-serving-system-design.html">
+      <div class="ctop"><span class="num">CH3</span><span class="rt">약 45분</span></div>
+      <div class="ttl">CH3 서빙 시스템 설계</div>
+      <div class="sub">서빙 시스템은 파일 여섯 개로 되어 있습니다</div>
+      <div class="dsc">추론하는 부품은 하나뿐, 나머지 다섯은 그 하나를 놀지 않게 하려고 있다. 큐 두 개·스트리밍·멀티모델 LRU.</div>
+    </a>
+    <a class="card" href="04-serving-best-practices.html">
+      <div class="ctop"><span class="num">CH4</span><span class="rt">약 55분</span></div>
+      <div class="ttl">CH4 서빙 베스트 프랙티스</div>
+      <div class="sub">질문은 하나였는데 왕복은 네 번이었습니다</div>
+      <div class="dsc">에이전트 워크플로우와 컨텍스트 체이닝, RAG와 CAG, 일곱 개 층, Public API, 카나리, Ray Serve와 KubeRay.</div>
+    </a>
+    </div>
+  </section>
+  <section class="wk">
+    <div class="wkh"><span class="wkb">3주차</span><h2>무엇이 느리게 만드나</h2><p>연산이 아니라 메모리 대역폭이 병목이다. 여기서 모든 최적화 기법이 나온다.</p></div>
+    <div class="grid">
+    <a class="card" href="05-serving-challenges.html">
+      <div class="ctop"><span class="num">CH5</span><span class="rt">약 40분</span></div>
+      <div class="ttl">CH5 LLM 서빙의 도전과제</div>
+      <div class="sub">느린 이유가 연산 부족이 아닐 때</div>
+      <div class="dsc">지연·비용·피크 부하 세 축. GPU에서 봐야 할 숫자 네 개, PCIe 128에서 NVSwitch 900까지, KV 캐시가 모델보다 커질 수 있다는 것.</div>
+    </a>
+    <a class="card" href="06-optimization-techniques.html">
+      <div class="ctop"><span class="num">CH6</span><span class="rt">약 50분</span></div>
+      <div class="ttl">CH6 LLM 최적화 기법</div>
+      <div class="sub">가중치를 한 번 읽고 몇 번 계산할 것인가</div>
+      <div class="dsc">정적·동적·연속 배칭과 청크 프리필, MHA→MQA→GQA→MLA, FlashAttention, PagedAttention, 양자화 W4A16 vs W8A8.</div>
+    </a>
+    </div>
+  </section>
+  <section class="wk">
+    <div class="wkh"><span class="wkb">4주차</span><h2>경계를 넘어가기</h2><p>GPU 한 장을 넘어서는 기법과, 그것을 담는 프레임워크.</p></div>
+    <div class="grid">
+    <a class="card" href="07-advanced-optimization.html">
+      <div class="ctop"><span class="num">CH7</span><span class="rt">약 55분</span></div>
+      <div class="ttl">CH7 고급 LLM 최적화 기법</div>
+      <div class="sub">GPU 한 장의 경계를 넘어가는 법</div>
+      <div class="dsc">추측적 디코딩과 거부·복원, 드래프트 네 가지 방법. 텐서 병렬과 파이프라인 병렬, NVLink냐 PCIe냐, MoE와 전문가 병렬.</div>
+    </a>
+    <a class="card" href="08-serving-frameworks.html">
+      <div class="ctop"><span class="num">CH8</span><span class="rt">약 45분</span></div>
+      <div class="ttl">CH8 LLM 서빙 프레임워크</div>
+      <div class="sub">기법을 담는 그릇을 열어보기</div>
+      <div class="dsc">엔진 티어와 오케스트레이션 티어, vLLM의 두 얼굴, 내부 여섯 계층·초기화·스케줄러·토큰 예산, TensorRT-LLM과 SGLang.</div>
+    </a>
+    </div>
+  </section>
+  <section class="wk">
+    <div class="wkh"><span class="wkb">5주차</span><h2>실전과 그다음</h2><p>측정하고 고르는 절차, 그리고 엔진이 판단하기 시작한 지점.</p></div>
+    <div class="grid">
+    <a class="card" href="09-optimization-in-practice.html">
+      <div class="ctop"><span class="num">CH9</span></div>
+      <div class="ttl">CH9 실전 LLM 최적화</div>
+      <div class="sub">처리량이 올랐다는 건 계산이 빨라진 걸까, 덜 계산한 걸까</div>
+      <div class="dsc">8단계 절차. GPU부터 보고, 트래픽을 정하고, 네 지표만 보고, 로그 다섯 줄로 병목을 찾는다. 베이스라인 2.4배에서 양자화로 2.7배.</div>
+    </a>
+    <a class="card" href="10-future-of-serving.html">
+      <div class="ctop"><span class="num">CH10</span></div>
+      <div class="ttl">CH10 LLM 서빙의 발전</div>
+      <div class="sub">서빙 엔진이 판단하기 시작했다</div>
+      <div class="dsc">시맨틱 캐싱과 라우팅, LiteLLM 게이트웨이, 프로파일링 순서, 멀티모달, 엣지 AI, Multi-LoRA, RL에서의 서빙.</div>
+    </a>
+    </div>
+  </section>
+<div class="note">
+  <p><b>읽는 방법</b> — 굵은 글씨만 따라가도 흐름이 이어집니다. 각 장 끝의 세 줄 요약만 읽고 넘어가도 됩니다.
+     그림은 <b>슬라이더를 끝까지 밀었을 때</b> 무슨 일이 나는지가 핵심입니다.</p>
+  <p><b>퀴즈</b> — 각 장 끝에 확인 문제가 있습니다. 답을 고르면 바로 해설이 나오고, 전문용어는 <b style="color:#c0392b">붉은 굵은 글씨</b>로 표시되며 마우스를 올리면 정의가 보입니다.</p>
+  <p><b>단축키</b> — 본문에서 <code>←</code> <code>→</code> 로 이전/다음 장 이동. 읽던 위치는 자동으로 기억됩니다.</p>
+</div>
+</div>
+<script>
+(function(){
+ var M={"00-llm-fundamentals":"LLM 기초와 동작 원리","00b-math-foundations":"트랜스포머를 위한 최소한의 수학","01-model-serving-intro":"CH1 모델 서빙과 최적화 입문","02-llm-serving":"CH2 LLM 서빙","03-serving-system-design":"CH3 서빙 시스템 설계","04-serving-best-practices":"CH4 서빙 베스트 프랙티스","05-serving-challenges":"CH5 LLM 서빙의 도전과제","06-optimization-techniques":"CH6 LLM 최적화 기법","07-advanced-optimization":"CH7 고급 LLM 최적화 기법","08-serving-frameworks":"CH8 LLM 서빙 프레임워크","09-optimization-in-practice":"CH9 실전 LLM 최적화","10-future-of-serving":"CH10 LLM 서빙의 발전"};
+ try{var l=localStorage.getItem('llmso:last');
+  if(l&&M[l]){var a=document.getElementById('resume');
+   a.href=l+'.html'; a.textContent='이어 읽기 — '+M[l]+' →'; a.style.display='inline-flex';}
+ }catch(e){}
+})();
+</script>
+</body></html>

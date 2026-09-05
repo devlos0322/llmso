@@ -1,0 +1,3566 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CH1. Introduction to Model Serving and Optimization — 인터랙티브 학습자료</title>
+
+
+
+<style id="lsx-shell">
+:root{ --topbar:46px; }
+html{ scroll-padding-top:56px; }
+body{ padding-top:46px !important; }
+#lsx-bar{position:fixed;top:0;left:0;right:0;height:46px;z-index:900;
+ display:flex;align-items:center;gap:12px;padding:0 14px;box-sizing:border-box;
+ background:rgba(255,255,255,.93);backdrop-filter:saturate(1.6) blur(10px);
+ border-bottom:1px solid #dfe5ee;font:500 13.5px/1.4 -apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Segoe UI",Roboto,sans-serif;
+ color:#1b2432}
+#lsx-prog{position:fixed;top:0;left:0;height:2px;width:0;z-index:901;background:#2563eb;transition:width .08s linear}
+.lsx-home{display:inline-flex;align-items:center;gap:6px;text-decoration:none;color:#1b2432;
+ font-weight:700;letter-spacing:-.01em;white-space:nowrap}
+.lsx-home:hover{color:#2563eb}
+.lsx-wk{font-size:11.5px;font-weight:600;color:#5a6675;background:#eef2f7;border:1px solid #dfe5ee;
+ border-radius:999px;padding:2px 8px;white-space:nowrap}
+.lsx-t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#5a6675;font-weight:500}
+.lsx-nav{display:flex;align-items:center;gap:6px;white-space:nowrap}
+.lsx-nav a,.lsx-nav span{display:inline-flex;align-items:center;justify-content:center;height:28px;padding:0 10px;
+ border:1px solid #dfe5ee;border-radius:8px;text-decoration:none;color:#1b2432;background:#fff;font-size:12.5px}
+.lsx-nav a:hover{border-color:#2563eb;color:#2563eb}
+.lsx-nav span{color:#b6bec9;background:#f7f9fc}
+.lsx-cnt{font-variant-numeric:tabular-nums;color:#8a94a3;font-size:12px;padding:0 2px}
+#lsx-foot{max-width:900px;margin:56px auto 72px;padding:0 18px;
+ font:500 14px/1.5 -apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Segoe UI",Roboto,sans-serif}
+#lsx-foot .lsx-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+#lsx-foot a{display:block;padding:14px 16px;border:1px solid #dfe5ee;border-radius:12px;
+ text-decoration:none;color:#1b2432;background:#f7f9fc}
+#lsx-foot a:hover{border-color:#2563eb;background:#fff}
+#lsx-foot .k{font-size:11.5px;color:#8a94a3;margin-bottom:3px}
+#lsx-foot .v{font-weight:700;letter-spacing:-.01em}
+#lsx-foot .nxt{text-align:right}
+#lsx-foot .toc{margin-top:12px;text-align:center}
+#lsx-foot .toc a{display:inline-block;background:#fff;padding:10px 20px}
+@media(max-width:640px){ .lsx-t,.lsx-wk{display:none} #lsx-foot .lsx-row{grid-template-columns:1fr} #lsx-foot .nxt{text-align:left} }
+@media print{ #lsx-bar,#lsx-prog,#lsx-foot{display:none!important} body{padding-top:0!important} }
+</style>
+
+<style id="lsx-mobile">
+/* ── 터치 타깃 & 안전영역 ── */
+#lsx-bar{padding-left:max(14px,env(safe-area-inset-left));padding-right:max(14px,env(safe-area-inset-right))}
+@media (max-width:760px){
+  :root{--topbar:54px}
+  body{padding-top:54px !important}
+  html{scroll-padding-top:64px}
+  #lsx-bar{height:54px}
+  .lsx-nav a,.lsx-nav span{height:44px;min-width:44px;padding:0 10px}
+  .lsx-home{height:44px;display:inline-flex;align-items:center}
+  #lsx-foot a{padding:16px 18px;min-height:44px}
+}
+/* ── 가로 스크롤 도식: 발견 가능하게 ── */
+#llmso-doc .lsx-fig{position:relative}
+#llmso-doc .lsx-fig::after{
+  content:"";position:absolute;top:1px;right:1px;bottom:1px;width:44px;pointer-events:none;
+  background:linear-gradient(to left,rgba(255,255,255,.96),rgba(255,255,255,0));
+  border-radius:0 10px 10px 0;opacity:1;transition:opacity .2s;z-index:2}
+#llmso-doc .lsx-fig.at-end::after{opacity:0}
+.lsx-hint{position:absolute;right:10px;bottom:10px;z-index:3;pointer-events:none;
+  display:inline-flex;align-items:center;gap:5px;
+  background:rgba(27,36,50,.86);color:#fff;border-radius:999px;padding:5px 11px;
+  font:600 11.5px/1 -apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Segoe UI",Roboto,sans-serif;
+  letter-spacing:-.01em;box-shadow:0 2px 10px rgba(0,0,0,.18);
+  opacity:1;transition:opacity .35s}
+#llmso-doc .lsx-fig.at-end .lsx-hint,#llmso-doc .lsx-fig.touched .lsx-hint{opacity:0}
+/* ── 모바일: 도식을 화면 폭까지 넓혀 스크롤 양을 줄인다 ── */
+@media (max-width:760px){
+  #llmso-doc .lsx-fig{width:100vw;margin-left:50%;transform:translateX(-50%)}
+  #llmso-doc .lsx-fig>.canvas-wrap{border-radius:0;border-left:0;border-right:0}
+  #llmso-doc .lsx-fig::after{border-radius:0;right:0}
+}
+@media print{ .lsx-hint,#llmso-doc .lsx-fig::after{display:none!important} }
+</style>
+
+<style id="lsx-study">
+/* ── 전문용어 강조 ── */
+#llmso-doc .lsx-term{font-weight:700;color:#c0392b;
+  border-bottom:1px dotted rgba(192,57,43,.42);cursor:help}
+#llmso-doc .lsx-term:hover{background:rgba(192,57,43,.07)}
+/* ── 퀴즈 ── */
+#lsx-quiz{max-width:820px;margin:64px auto 0;padding:0 18px;
+  font:400 15.5px/1.72 -apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Segoe UI",Roboto,sans-serif;color:#1b2432}
+#lsx-quiz .qh{border-top:2px solid #1b2432;padding-top:20px;margin-bottom:6px;
+  display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+#lsx-quiz .qh h2{margin:0;font-size:22px;letter-spacing:-.02em;font-weight:800}
+#lsx-quiz .qh .sub{color:#8a94a3;font-size:13.5px}
+#lsx-quiz .qbar{height:5px;background:#eef2f7;border-radius:99px;margin:14px 0 22px;overflow:hidden}
+#lsx-quiz .qbar i{display:block;height:100%;width:0;background:#2563eb;transition:width .3s}
+.qitem{border:1px solid #dfe5ee;border-radius:14px;padding:18px 19px;margin-bottom:14px;background:#f7f9fc}
+.qitem .qn{font-size:11.5px;font-weight:800;letter-spacing:.06em;color:#2563eb;margin-bottom:7px}
+.qitem .qq{font-weight:700;letter-spacing:-.01em;margin-bottom:13px;line-height:1.55}
+.qopt{display:block;width:100%;text-align:left;background:#fff;border:1px solid #dfe5ee;border-radius:10px;
+  padding:12px 14px;margin-bottom:8px;font:inherit;font-size:14.5px;color:#1b2432;cursor:pointer;
+  min-height:44px;transition:.12s;-webkit-tap-highlight-color:transparent}
+.qopt:hover:not(:disabled){border-color:#2563eb;background:#f5f9ff}
+.qopt:disabled{cursor:default}
+.qopt.ok{border-color:#15803d;background:#f0fdf4;font-weight:700}
+.qopt.no{border-color:#c0392b;background:#fef2f2}
+.qopt .mk{float:right;font-weight:800}
+.qex{display:none;margin-top:10px;padding:12px 14px;border-radius:10px;background:#eef2f7;
+  border-left:3px solid #2563eb;font-size:14px;line-height:1.68;color:#5a6675}
+.qex.on{display:block}
+.qex b{color:#1b2432}
+#lsx-quiz .qdone{display:none;margin-top:18px;padding:20px;border-radius:14px;background:#eef2f7;
+  border:1px solid #dfe5ee;text-align:center}
+#lsx-quiz .qdone.on{display:block}
+#lsx-quiz .qdone .sc{font-size:30px;font-weight:800;letter-spacing:-.02em;margin-bottom:6px}
+#lsx-quiz .qdone .cm{color:#5a6675;font-size:14.5px}
+#lsx-quiz .qreset{margin-top:14px;background:#fff;border:1px solid #dfe5ee;border-radius:10px;
+  padding:10px 18px;font:inherit;font-size:14px;font-weight:600;cursor:pointer;min-height:44px}
+#lsx-quiz .qreset:hover{border-color:#2563eb;color:#2563eb}
+@media(max-width:640px){ #lsx-quiz{padding:0 16px} .qitem{padding:16px} }
+@media print{ #lsx-quiz .qex{display:block} }
+</style>
+</head>
+<body><div id="lsx-prog"></div>
+<div id="lsx-bar">
+  <a class="lsx-home" href="index.html">◈ LLMSO</a>
+  <span class="lsx-wk">1주차</span>
+  <span class="lsx-t">CH1 모델 서빙과 최적화 입문 — 학습이 끝난 모델을 진짜 서비스로 만드는 일</span>
+  <span class="lsx-nav"><a href="00b-math-foundations.html" title="트랜스포머를 위한 최소한의 수학">←</a><span class="lsx-cnt">3 / 12</span><a href="02-llm-serving.html" title="CH2 LLM 서빙">→</a></span>
+</div>
+<div id="llmso-doc" class="llmso-doc">
+<!-- styles moved into body -->
+<style data-llmso-scoped="1">
+:root{
+    --bg:#ffffff; --panel:#f7f9fc; --panel2:#eef2f7; --line:#dfe5ee;
+    --tx:#1b2432; --mut:#5a6675; --dim:#8a94a3;
+    --a:#2563eb; --b:#b8690b; --c:#15803d; --d:#c2185b; --e:#6d28d9;
+    --radius:14px;
+    --shadow:0 1px 2px rgba(16,24,40,.04), 0 1px 3px rgba(16,24,40,.05);
+  }
+#llmso-doc *{box-sizing:border-box}
+html{scroll-behavior:smooth; scroll-padding-top:76px}
+#llmso-doc{
+    margin:0; background:var(--bg); color:var(--tx);
+    font-family:system-ui,-apple-system,"Apple SD Gothic Neo","Pretendard","Noto Sans KR","Malgun Gothic",sans-serif;
+    font-size:17.5px; line-height:1.95; letter-spacing:-.01em;
+    -webkit-font-smoothing:antialiased;
+  }
+#llmso-doc a{color:var(--a)}
+#llmso-doc nav{position:sticky; top:0; z-index:50; background:#fff; border-bottom:1px solid var(--line)}
+#llmso-doc nav .inner{max-width:1080px; margin:0 auto; padding:10px 20px; display:flex; gap:6px;
+    flex-wrap:nowrap; overflow-x:auto; overscroll-behavior-x:contain; align-items:center;
+    scrollbar-width:none; -ms-overflow-style:none}
+#llmso-doc nav .inner::-webkit-scrollbar{display:none}
+#llmso-doc nav .brand{flex:none; font-weight:700; margin-right:14px; font-size:15px; color:var(--mut)}
+#llmso-doc nav a{flex:none; color:var(--mut); text-decoration:none; font-size:14px; padding:6px 11px;
+    border-radius:999px; border:1px solid transparent; white-space:nowrap}
+#llmso-doc nav a:hover{color:var(--tx); border-color:var(--line); background:var(--panel)}
+#llmso-doc main{max-width:1080px; margin:0 auto; padding:0 20px 120px}
+#llmso-doc header.hero{padding:72px 0 44px; border-bottom:1px solid var(--line)}
+#llmso-doc header.hero h1{font-size:clamp(27px,4.2vw,42px); line-height:1.35; margin:0 0 20px; letter-spacing:-.03em}
+#llmso-doc header.hero h1 em{font-style:normal; color:var(--a)}
+#llmso-doc header.hero p{color:var(--mut); font-size:18px; max-width:44em; margin:0 0 14px !important}
+#llmso-doc .tagline{display:inline-block; font-size:13px; color:var(--c); border:1px solid rgba(21,128,61,.28);
+    background:rgba(21,128,61,.07); padding:5px 12px; border-radius:999px; margin-bottom:24px; letter-spacing:0}
+#llmso-doc section{padding:60px 0; border-bottom:1px solid var(--line)}
+#llmso-doc h2{font-size:clamp(23px,3.1vw,31px); margin:0 0 8px; letter-spacing:-.02em; line-height:1.4}
+#llmso-doc h2 .num{color:var(--dim); font-variant-numeric:tabular-nums; margin-right:12px; font-weight:600}
+#llmso-doc .sub{color:var(--mut); margin:0 0 34px; font-size:16.5px}
+#llmso-doc h3{font-size:20px; margin:46px 0 12px; letter-spacing:-.01em}
+#llmso-doc p{margin:0 0 17px !important}
+#llmso-doc strong, #llmso-doc b{color:#0b1220; font-weight:650}
+#llmso-doc .muted{color:var(--mut)}
+#llmso-doc code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:.87em;
+    background:#eef2f9; padding:2px 6px; border-radius:5px; color:#1d4ed8; letter-spacing:0}
+#llmso-doc .why{background:linear-gradient(180deg,rgba(37,99,235,.07),rgba(37,99,235,.02));
+    border:1px solid rgba(37,99,235,.22); border-radius:var(--radius); padding:20px 22px; margin:0 0 30px}
+#llmso-doc .why .t{display:block; font-size:12.5px; font-weight:700; letter-spacing:.06em; color:var(--a); margin-bottom:8px}
+#llmso-doc .why p:last-child{margin-bottom:0 !important}
+#llmso-doc .why .q{font-size:19px; font-weight:650; color:#0b1220; margin-bottom:10px; line-height:1.6}
+#llmso-doc .terms{background:var(--panel); border:1px solid var(--line); border-left:3px solid var(--b);
+    border-radius:10px; padding:16px 20px; margin:24px 0}
+#llmso-doc .terms .t{display:block; font-size:12.5px; font-weight:700; letter-spacing:.05em; color:var(--b); margin-bottom:10px}
+#llmso-doc .terms dl{margin:0}
+#llmso-doc .terms dt{font-weight:650; color:#0b1220; font-size:15.5px; margin-top:12px}
+#llmso-doc .terms dt:first-of-type{margin-top:0}
+#llmso-doc .terms dd{margin:2px 0 0; color:var(--mut); font-size:15.5px; line-height:1.75}
+#llmso-doc .terms dd em{font-style:normal; color:var(--tx); font-weight:600}
+#llmso-doc .steps{counter-reset:st; list-style:none; padding:0; margin:22px 0}
+#llmso-doc .steps li{counter-increment:st; position:relative; padding:0 0 0 46px; margin-bottom:20px}
+#llmso-doc .steps li::before{
+    content:counter(st); position:absolute; left:0; top:2px; width:30px; height:30px;
+    border-radius:50%; background:#fff; border:1px solid var(--line); box-shadow:var(--shadow);
+    color:var(--a); font-size:14px; font-weight:700; display:flex; align-items:center; justify-content:center;
+  }
+#llmso-doc .steps li b{display:block; color:#0b1220; margin-bottom:2px}
+#llmso-doc .steps li span{color:var(--mut); font-size:16px}
+#llmso-doc .calc{background:#f6f8fc; border:1px solid var(--line); border-radius:10px; padding:16px 20px; margin:20px 0;
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:15px; line-height:2.1;
+    letter-spacing:0; color:#243044; overflow-x:auto}
+#llmso-doc .calc .cm{color:#98a2b3}
+#llmso-doc .calc .hl{color:var(--c); font-weight:700}
+#llmso-doc details.more{background:var(--panel); border:1px solid var(--line); border-radius:10px; margin:22px 0; overflow:hidden}
+#llmso-doc details.more summary{cursor:pointer; padding:13px 18px; font-size:14.5px; color:var(--mut); list-style:none;
+    display:flex; align-items:center; gap:9px; user-select:none}
+#llmso-doc details.more summary::-webkit-details-marker{display:none}
+#llmso-doc details.more summary::before{content:'▸'; color:var(--dim); font-size:12px; transition:transform .15s}
+#llmso-doc details.more[open] summary::before{transform:rotate(90deg)}
+#llmso-doc details.more summary:hover{color:var(--tx); background:var(--panel2)}
+#llmso-doc details.more .body{padding:4px 18px 18px; border-top:1px solid var(--line); font-size:15.5px; color:var(--mut)}
+#llmso-doc details.more .body p:last-child{margin-bottom:0 !important}
+#llmso-doc details.more .f{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:16px;
+    color:#1e3a8a; letter-spacing:0; line-height:2; margin:14px 0; overflow-x:auto}
+#llmso-doc .note{border-radius:10px; padding:15px 19px; margin:22px 0; font-size:16px;
+    background:rgba(37,99,235,.05); border:1px solid rgba(37,99,235,.2)}
+#llmso-doc .note.warn{background:rgba(184,105,11,.06); border-color:rgba(184,105,11,.24)}
+#llmso-doc .note.ok{background:rgba(21,128,61,.06); border-color:rgba(21,128,61,.2)}
+#llmso-doc .note .t{display:block; font-weight:700; margin-bottom:6px; font-size:13px; letter-spacing:.02em; color:var(--a)}
+#llmso-doc .note.warn .t{color:var(--b)}
+#llmso-doc .note.ok .t{color:var(--c)}
+#llmso-doc .note p:last-child{margin-bottom:0 !important}
+#llmso-doc .sum{background:linear-gradient(180deg,rgba(21,128,61,.07),rgba(21,128,61,.02));
+    border:1px solid rgba(21,128,61,.26); border-radius:var(--radius); padding:20px 24px; margin:40px 0 0}
+#llmso-doc .sum .t{display:block; font-size:12.5px; font-weight:700; letter-spacing:.06em; color:var(--c); margin-bottom:12px}
+#llmso-doc .sum ol{margin:0; padding-left:22px}
+#llmso-doc .sum li{margin-bottom:8px; font-size:16.5px}
+#llmso-doc .sum li:last-child{margin-bottom:0}
+#llmso-doc .syms{display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin:26px 0}
+#llmso-doc .sym{background:#fff; border:1px solid var(--line); border-radius:12px; padding:15px 17px; box-shadow:var(--shadow)}
+#llmso-doc .sym .g{font-family:ui-monospace,Menlo,monospace; font-size:22px; color:var(--a); margin-bottom:4px}
+#llmso-doc .sym .n{font-size:14.5px; color:#0b1220; font-weight:650}
+#llmso-doc .sym .d{font-size:14px; color:var(--mut); line-height:1.7}
+#llmso-doc .demo{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:18px; margin:26px 0 30px}
+#llmso-doc .demo-head{display:flex; align-items:baseline; gap:10px; margin-bottom:8px; flex-wrap:wrap}
+#llmso-doc .demo-head .tag{font-size:11px; font-weight:700; letter-spacing:.08em; color:#fff; background:var(--a); padding:3px 8px; border-radius:5px}
+#llmso-doc .demo-head h4{margin:0; font-size:16.5px; font-weight:650}
+#llmso-doc .demo-head .hint{font-size:13px; color:var(--dim); margin-left:auto}
+#llmso-doc .demo .todo{font-size:14.5px; color:#8a4d02; background:rgba(184,105,11,.07);
+    border:1px dashed rgba(184,105,11,.35); border-radius:8px; padding:9px 13px; margin:0 0 14px}
+#llmso-doc .demo .todo b{color:#6b3c02}
+#llmso-doc .stage{display:grid; grid-template-columns:1fr 300px; gap:18px; align-items:start}
+  @media(max-width:820px){
+#llmso-doc .stage{grid-template-columns:1fr} }
+#llmso-doc .canvas-wrap{position:relative; background:#fff; border:1px solid var(--line); border-radius:10px; overflow:hidden}
+#llmso-doc canvas{display:block; width:100%; touch-action:none; cursor:crosshair}
+#llmso-doc .side{display:flex; flex-direction:column; gap:12px}
+#llmso-doc .readout{background:#fff; border:1px solid var(--line); border-radius:10px; padding:12px 14px; box-shadow:var(--shadow)}
+#llmso-doc .readout .row{display:flex; justify-content:space-between; align-items:baseline; gap:10px; padding:4px 0; font-size:14px; line-height:1.6}
+#llmso-doc .readout .row + .row{border-top:1px dashed #e6ebf3}
+#llmso-doc .readout .k{color:var(--mut); font-size:13px}
+#llmso-doc .readout .v{font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-variant-numeric:tabular-nums; letter-spacing:0}
+#llmso-doc .ctrl{background:#fff; border:1px solid var(--line); border-radius:10px; padding:12px 14px; box-shadow:var(--shadow)}
+#llmso-doc .ctrl label{display:block; font-size:13px; color:var(--mut); margin-bottom:6px; line-height:1.6}
+#llmso-doc .ctrl label b{color:var(--tx); font-family:ui-monospace,Menlo,monospace; font-weight:600; float:right}
+#llmso-doc input[type=range]{width:100%; -webkit-appearance:none; appearance:none; height:5px; border-radius:99px;
+    background:#d5dceb; outline:none; margin:6px 0 14px}
+#llmso-doc input[type=range]::-webkit-slider-thumb{-webkit-appearance:none; width:18px; height:18px; border-radius:50%;
+    background:var(--a); border:3px solid #fff; box-shadow:0 0 0 1px var(--a); cursor:grab}
+#llmso-doc input[type=range]::-moz-range-thumb{width:14px; height:14px; border-radius:50%; background:var(--a);
+    border:3px solid #fff; box-shadow:0 0 0 1px var(--a); cursor:grab}
+#llmso-doc .btnrow{display:flex; gap:8px; flex-wrap:wrap}
+#llmso-doc button{font:inherit; font-size:13px; color:var(--tx); background:#fff;
+    border:1px solid var(--line); border-radius:8px; padding:7px 13px; cursor:pointer; box-shadow:var(--shadow)}
+#llmso-doc button:hover{border-color:#b9c4d6; background:#f4f7fb}
+#llmso-doc button.on{background:var(--a); border-color:var(--a); color:#fff; font-weight:600}
+#llmso-doc table{width:100%; border-collapse:collapse; margin:22px 0; font-size:15.5px}
+#llmso-doc th, #llmso-doc td{text-align:left; padding:12px; border-bottom:1px solid var(--line); vertical-align:top}
+#llmso-doc th{color:var(--mut); font-size:13px; font-weight:600; background:var(--panel)}
+#llmso-doc .bars{display:flex; flex-direction:column; gap:7px}
+#llmso-doc .bar{display:grid; grid-template-columns:64px 1fr 54px; align-items:center; gap:9px; font-size:13px}
+#llmso-doc .bar .nm{color:var(--mut); text-align:right; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+#llmso-doc .bar .track{height:16px; background:#eef2f8; border-radius:5px; overflow:hidden; border:1px solid var(--line)}
+#llmso-doc .bar .fill{height:100%; width:0; border-radius:4px; transition:width .12s ease}
+#llmso-doc .bar .val{font-family:ui-monospace,Menlo,monospace; font-variant-numeric:tabular-nums; text-align:right; color:var(--mut); letter-spacing:0}
+#llmso-doc .recap{text-align:center; color:var(--dim); font-size:14.5px; padding:34px 0 0; letter-spacing:.01em}
+#llmso-doc footer{padding:48px 0 0; color:var(--dim); font-size:14px; text-align:center}
+#llmso-doc .mm{display:flex; align-items:center; gap:12px; flex-wrap:wrap; justify-content:center; padding:6px 0 4px}
+#llmso-doc .mmb{text-align:center}
+#llmso-doc .mmcap{font-size:12.5px; color:var(--mut); margin-bottom:6px; white-space:nowrap}
+#llmso-doc .mmt{border-collapse:separate; border-spacing:3px; margin:0 auto}
+#llmso-doc .mmt td{width:52px; height:34px; text-align:center; border-radius:6px;
+    font-family:ui-monospace,Menlo,monospace; font-size:14px; letter-spacing:0;
+    background:#fff; border:1px solid var(--line); color:var(--tx)}
+#llmso-doc .mmt td.hd{background:transparent; border:0; color:var(--mut); font-size:12px;
+    font-family:inherit; width:auto; padding:0 6px; white-space:nowrap}
+#llmso-doc .mmt td.ch{cursor:pointer; background:#f2f6fd}
+#llmso-doc .mmt td.ch:hover{background:#dfeafc}
+#llmso-doc .mmt td.sel{background:var(--a); border-color:var(--a); color:#fff; font-weight:700}
+#llmso-doc .mmt td.hi{background:#e4eefc; border-color:#a8c6f2}
+#llmso-doc .mmop{font-size:20px; color:var(--dim)}
+  @media(max-width:640px){
+#llmso-doc .mmt td{width:42px; height:30px; font-size:12.5px} }
+#llmso-doc pre.code{background:#f6f8fc; border:1px solid var(--line); border-radius:10px;
+    padding:14px 17px; overflow-x:auto; margin:0 0 8px;
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    font-size:12.5px; line-height:1.8; letter-spacing:0; color:#243044; white-space:pre}
+#llmso-doc .code-head{font-size:12px; color:var(--dim); margin:16px 0 6px; font-weight:600; letter-spacing:.03em}
+#llmso-doc .cmp{border-top:1px dashed var(--line); padding-top:30px; margin-top:34px}
+#llmso-doc .cmp:first-of-type{border-top:0; padding-top:0; margin-top:14px}
+#llmso-doc .cmp > h4{margin:0 0 4px; font-size:17px}
+#llmso-doc .cmp > .use{margin:0 0 16px; color:var(--mut); font-size:15px}
+#llmso-doc .api td:first-child{font-family:ui-monospace,Menlo,monospace; font-size:13px; color:#1d4ed8; white-space:nowrap}
+#llmso-doc .meta{display:flex; gap:8px; flex-wrap:wrap; margin:20px 0 28px}
+#llmso-doc .meta span{font-size:13px; color:var(--mut); background:var(--panel);
+    border:1px solid var(--line); border-radius:999px; padding:5px 14px; white-space:nowrap}
+#llmso-doc .meta span b{color:var(--tx); font-weight:600}
+#llmso-doc section.essay h2{margin-bottom:18px}
+#llmso-doc section.essay h2::after{content:''; display:block; width:36px; height:3px;
+    background:var(--a); border-radius:2px; margin-top:12px}
+#llmso-doc .tldr{background:linear-gradient(180deg,rgba(37,99,235,.07),rgba(37,99,235,.02));
+    border:1px solid rgba(37,99,235,.22); border-radius:var(--radius); padding:20px 24px; margin:26px 0}
+#llmso-doc .tldr .t{display:block; font-size:12.5px; font-weight:700; letter-spacing:.06em; color:var(--a); margin-bottom:12px}
+#llmso-doc .tldr ol{margin:0; padding-left:22px}
+#llmso-doc .tldr li{margin-bottom:8px; font-size:17px}
+#llmso-doc .tldr li:last-child{margin-bottom:0}
+#llmso-doc .howto{border:1px dashed var(--line); border-radius:12px; padding:16px 20px; margin:26px 0;
+    background:var(--panel); font-size:15.5px; color:var(--mut)}
+#llmso-doc .howto b{color:#0b1220}
+#llmso-doc .howto p{margin:0 0 9px !important}
+#llmso-doc .howto p:last-child{margin:0 !important}
+#llmso-doc .sign{margin-top:36px; padding-top:22px; border-top:1px solid var(--line);
+    color:var(--dim); font-size:14.5px; line-height:1.9}
+</style>
+<style id="embed-fit" data-llmso-scoped="1">
+:root{ --topbar: 0px; }
+#llmso-doc nav{ top: var(--topbar) !important; }
+#llmso-doc.embed-loose-doc nav{ position: static !important; top: auto !important; }
+</style>
+<style id="llmso-armor">
+  /* ── 스킨 방어 — 블로그 스킨이 nav·main·section 같은 태그 선택자를 이미 쓰고 있으면
+        우리 레이아웃이 통째로 밀린다. 구조에 관계된 속성만 여기서 못을 박는다.
+        색·글꼴·여백은 건드리지 않으니 스킨과 충돌할 일이 없다. ── */
+  /* 스킨이 #id 로 선택자를 쓰는 경우가 흔해서, 우리도 id 두 개를 겹쳐 우선순위를 올린다.
+     (클래스는 아무리 겹쳐도 id 하나를 못 이긴다) */
+  #llmso-doc, #llmso-doc *{ box-sizing: border-box; }
+  #llmso-doc.llmso-doc{ position: static !important; display: block !important; float: none !important;
+    width: auto !important; max-width: none !important; overflow: visible !important;
+    transform: none !important; contain: none !important; height: auto !important; }
+  #llmso-doc #llmso-nav.llmso-nav{
+    position: sticky !important; top: var(--topbar, 0px) !important; z-index: 60 !important;
+    display: block !important; float: none !important; clear: both !important;
+    left: auto !important; right: auto !important; bottom: auto !important;
+    width: auto !important; max-width: none !important; height: auto !important;
+    min-height: 0 !important; margin: 0 !important; padding: 0 !important;
+    background: #fff !important; border-bottom: 1px solid var(--line) !important;
+    transform: none !important; opacity: 1 !important; visibility: visible !important;
+    overflow: visible !important; }
+  #llmso-doc.embed-loose-doc #llmso-nav.llmso-nav{ position: static !important; top: auto !important; }
+  #llmso-doc #llmso-nav.llmso-nav .inner{
+    display: flex !important; flex-wrap: nowrap !important; overflow-x: auto !important;
+    align-items: center !important; float: none !important; position: static !important;
+    width: auto !important; height: auto !important; }
+  #llmso-doc #llmso-nav.llmso-nav .inner > *{ flex: none !important; float: none !important;
+    position: static !important; display: inline-flex !important; align-items: center !important; }
+  #llmso-doc main{ position: static !important; display: block !important; float: none !important;
+    width: auto !important; overflow: visible !important; }
+  #llmso-doc header.hero, #llmso-doc section, #llmso-doc .demo{
+    position: static !important; display: block !important; float: none !important;
+    width: auto !important; }
+  #llmso-doc .stage{ display: grid !important; position: static !important; float: none !important; }
+  #llmso-doc canvas{ display: block !important; float: none !important;
+    position: static !important; max-width: 100% !important; }
+
+  /* ── 무너짐 방지 ──
+     스킨이 본문 요소에 float 이나 position 을 걸면, 부모 상자가 자식 높이를 못 재서
+     내용이 상자 밖으로 흘러나오고 아래 문단과 겹친다. 실제로 그 사고가 났다.
+     ① 우리 영역 안의 모든 요소에서 float·position 을 되돌리고
+     ② 상자 노릇을 하는 요소는 flow-root 로 만들어 자식을 반드시 품게 한다. */
+  #llmso-doc div, #llmso-doc p, #llmso-doc span, #llmso-doc section, #llmso-doc header,
+  #llmso-doc main, #llmso-doc footer, #llmso-doc article, #llmso-doc aside,
+  #llmso-doc h1, #llmso-doc h2, #llmso-doc h3, #llmso-doc h4, #llmso-doc h5,
+  #llmso-doc ul, #llmso-doc ol, #llmso-doc li, #llmso-doc dl, #llmso-doc dt, #llmso-doc dd,
+  #llmso-doc table, #llmso-doc thead, #llmso-doc tbody, #llmso-doc tr, #llmso-doc th, #llmso-doc td,
+  #llmso-doc pre, #llmso-doc code, #llmso-doc button, #llmso-doc input, #llmso-doc label,
+  #llmso-doc details, #llmso-doc summary, #llmso-doc canvas, #llmso-doc figure,
+  #llmso-doc blockquote, #llmso-doc hr, #llmso-doc b, #llmso-doc em, #llmso-doc a, #llmso-doc img{
+    float: none !important; clear: none !important; position: static !important;
+    transform: none !important; inset: auto !important; }
+  #llmso-doc, #llmso-doc main, #llmso-doc header.hero, #llmso-doc section,
+  #llmso-doc .demo, #llmso-doc .why, #llmso-doc .terms, #llmso-doc .note,
+  #llmso-doc .sum, #llmso-doc .tldr, #llmso-doc .howto, #llmso-doc .calc,
+  #llmso-doc .steps, #llmso-doc .readout, #llmso-doc .ctrl, #llmso-doc .canvas-wrap{
+    display: flow-root !important; }
+  #llmso-doc p, #llmso-doc h1, #llmso-doc h2, #llmso-doc h3, #llmso-doc h4,
+  #llmso-doc li, #llmso-doc dt, #llmso-doc dd, #llmso-doc footer{ display: block !important; }
+  /* 되돌린 것 중, 우리가 진짜로 필요로 하는 위치 지정은 다시 살린다 */
+  #llmso-doc .steps li{ position: relative !important; }
+  #llmso-doc .canvas-wrap{ position: relative !important; }
+  #llmso-doc .ctrl label b{ float: right !important; }
+  /* 레이아웃용 display 는 flow-root 보다 뒤에 와서 이긴다 */
+  #llmso-doc .stage{ display: grid !important; }
+  #llmso-doc .meta, #llmso-doc .demo-head, #llmso-doc .bars, #llmso-doc .side,
+  #llmso-doc .btnrow, #llmso-doc .readout .row{ display: flex !important; }
+  #llmso-doc .syms{ display: grid !important; }
+  #llmso-doc .bar{ display: grid !important; }
+  #llmso-doc .tagline{ display: inline-block !important; }
+
+  /* ── 실제 원인이었던 것 ──
+     hELLO 스킨에 `.permalink[data-mode='tape'] header { height: 280px }` 가 있다.
+     우리 <header class="hero"> 도 그냥 header 라서 이 규칙에 걸려 280px 로 잘리고,
+     넘친 내용이 아래 문단 위에 겹쳐 그려졌다. 높이는 언제나 내용이 정한다. */
+  #llmso-doc, #llmso-doc header, #llmso-doc section, #llmso-doc main, #llmso-doc nav,
+  #llmso-doc footer, #llmso-doc article, #llmso-doc aside, #llmso-doc div,
+  #llmso-doc p, #llmso-doc h1, #llmso-doc h2, #llmso-doc h3, #llmso-doc h4, #llmso-doc h5,
+  #llmso-doc ul, #llmso-doc ol, #llmso-doc li, #llmso-doc dl, #llmso-doc dt, #llmso-doc dd,
+  #llmso-doc table, #llmso-doc thead, #llmso-doc tbody, #llmso-doc tr, #llmso-doc th, #llmso-doc td,
+  #llmso-doc figure, #llmso-doc blockquote, #llmso-doc details, #llmso-doc summary,
+  #llmso-doc pre, #llmso-doc form, #llmso-doc button, #llmso-doc label{
+    height: auto !important; min-height: 0 !important; max-height: none !important; }
+  /* 위 초기화에 휩쓸린 것 중 우리가 실제로 높이를 지정하는 것만 되살린다 */
+  #llmso-doc .mmt td{ height: 34px !important; }
+
+  /* ── 표는 좁은 화면에서 눌리지 말고 옆으로 밀리게 ──
+     칸이 좁아지면 글자가 세로로 길게 늘어져 읽기가 나빠진다.
+     최소 너비를 주고 감싼 상자가 가로로 스크롤되게 한다. 칸 수가 많을수록 더 넓게. */
+  #llmso-doc .tscroll{ overflow-x: auto !important; -webkit-overflow-scrolling: touch;
+    margin: 22px 0; border-radius: 10px; }
+  @media (max-width: 760px){
+    #llmso-doc table:not(.mmt){ min-width: 430px !important; }
+    #llmso-doc table:not(.mmt):has(th:nth-child(3)),
+    #llmso-doc table:not(.mmt):has(td:nth-child(3)){ min-width: 560px !important; }
+    #llmso-doc table:not(.mmt):has(th:nth-child(4)),
+    #llmso-doc table:not(.mmt):has(td:nth-child(4)){ min-width: 680px !important; }
+    #llmso-doc table:not(.mmt):has(th:nth-child(5)),
+    #llmso-doc table:not(.mmt):has(td:nth-child(5)){ min-width: 800px !important; }
+    /* 행렬 곱 그림은 칸 크기가 정해져 있어서 최소너비를 주면 안 된다 */
+    #llmso-doc .mmt{ min-width: 0 !important; }
+    #llmso-doc .mm{ overflow-x: auto !important; -webkit-overflow-scrolling: touch; }
+    /* 좁은 화면에서는 세로 스크롤이 항상 되게 — 그림 위에서 손가락이 묶이지 않도록.
+       슬라이더·버튼은 그대로 동작한다. */
+    #llmso-doc canvas{ touch-action: pan-y !important; }
+    #llmso-doc .stage{ gap: 14px !important; }
+    #llmso-doc .side{ gap: 10px !important; }
+
+    /* ── 그림은 좁은 화면에서 찌그러뜨리지 않는다 ──
+       캔버스 안의 글자·상자는 픽셀 좌표로 그려져 있어서, 폭을 줄이면 서로 겹친다.
+       그래서 그림은 원래 폭(560px)을 유지하고 상자를 옆으로 밀어 보게 한다. */
+    #llmso-doc .canvas-wrap{ overflow-x: auto !important; -webkit-overflow-scrolling: touch; }
+    #llmso-doc canvas{ width: 560px !important; max-width: none !important;
+      touch-action: auto !important; }
+    #llmso-doc .stage::before{ content: '그림은 좌우로 밀어서 볼 수 있습니다';
+      display: block; font: 11.5px system-ui, -apple-system, sans-serif;
+      color: #8a94a3; margin: 0 0 4px; }
+  }
+</style>
+
+
+<nav id="llmso-nav" class="llmso-nav"><div class="inner">
+  <span class="brand">CH1 · Model Serving</span>
+  <a href="#ch-intro">들어가며</a>
+  <a href="#ch-parts">1 구성요소</a>
+  <a href="#ch-lifecycle">2 생명주기</a>
+  <a href="#ch-serving">3 서빙이란</a>
+  <a href="#ch-why">4 왜 공부하나</a>
+  <a href="#ch-optimize">5 최적화</a>
+  <a href="#ch-vllm">6 vLLM</a>
+  <a href="#ch-ondevice">7 On-Device</a>
+  <a href="#ch-single">8 Single</a>
+  <a href="#ch-multi">9 Multi</a>
+  <a href="#ch-platform">10 Platform</a>
+  <a href="#ch-wrap">11 정리</a>
+  <a href="#ch-outro">마치며</a>
+</div></nav>
+
+<main>
+<header class="hero">
+  <span class="tagline">LLM 서빙 스터디 1주차 · CH1 학습자료</span>
+  <h1>학습이 끝난 모델을<br><em>진짜 서비스</em>로 만드는 일.</h1>
+  <p><b>Introduction to Model Serving and Optimization</b> — 모델이 무엇으로 이루어져 있는지부터,
+  그것을 API로 내보내고 빠르고 싸게 굴리는 네 가지 방법까지.</p>
+  <p>수학은 거의 나오지 않습니다. 나오는 것은 전부 접는 상자 안에 넣었고,
+  본문은 <b>덧셈과 곱셈</b>만으로 따라갈 수 있게 썼습니다.</p>
+
+  <div class="note ok" style="margin-top:26px">
+    <span class="t">이 자료가 지키는 것</span>
+    <p><b>① 전문 용어는 영어 그대로.</b> <code>throughput</code>을 억지로 번역하지 않습니다. 대신 뜻을 한국어로 풀어둡니다.<br>
+    <b>② 용어는 나오기 전에 뜻풀이.</b> 모르는 단어로 설명하지 않습니다.<br>
+    <b>③ 그림 11개 전부 조작 가능.</b> 슬라이더를 끝까지 밀어보는 게 이 자료의 핵심입니다.<br>
+    <b>④ 장마다 세 줄 요약.</b> 거기만 읽어도 넘어갈 수 있게.</p>
+  </div>
+</header>
+
+<section class="essay" id="ch-intro">
+  <h2>들어가며</h2>
+
+  <div class="meta">
+    <span>읽는 시간 <b>약 40분</b></span>
+    <span>대상 <b>코드는 쓰지만 수학·ML은 낯선 개발자</b></span>
+    <span>사전 지식 <b>없어도 됨</b></span>
+    <span>그림 <b>11개 · 전부 조작 가능</b></span>
+  </div>
+
+  <p>"모델을 배포했다"는 말을 처음 들었을 때, 저는 그게 <code>scp</code>로 파일 하나 올리는 일인 줄 알았습니다.
+  실제로 해보니 아니었습니다. 파일은 올라갔는데 실행이 안 됐고, 실행은 되는데 느렸습니다.</p>
+
+  <p>기존 ML 자료들은 대부분 <b>학습(training)</b> 이야기였습니다.
+  손실 함수가 어떻고 옵티마이저가 어떻고 — 정작 <b>학습이 끝난 다음</b>에 무슨 일이 벌어지는지는
+  잘 안 나옵니다. 이 글은 그 "다음"만 다룹니다.</p>
+
+  <p>다루는 범위는 <b>모델의 구조 · 서빙의 정의 · 최적화가 왜 필수인지 · 서빙 방식 네 가지</b>입니다.</p>
+
+  <div class="tldr">
+    <span class="t">결론부터 세 줄</span>
+    <ol>
+      <li>모델은 파일 하나가 아니라 <b>model data + model architecture + model execution code</b> 세 덩어리가 합쳐진 <b>실행 가능한 소프트웨어</b>입니다.</li>
+      <li>모델 서빙은 알고리즘 문제가 아니라 <b>시스템 엔지니어링</b> 문제입니다. latency · throughput · cost 이 셋을 저울질하는 일이고, 모든 상황에 맞는 정답 하나는 없습니다.</li>
+      <li>LLM에서는 최적화가 선택이 아닙니다. 하드웨어를 하나도 안 늘리고 <b>설정값 몇 개만 바꿔서</b> 처리량이 몇 배씩 달라집니다.</li>
+    </ol>
+  </div>
+
+  <div class="howto">
+    <p><b>읽는 방법</b></p>
+    <p>· <b>굵은 글씨만 따라가도</b> 흐름이 이어집니다.</p>
+    <p>· 회색으로 접힌 상자(▸ 숫자로도 보고 싶다면)는 <b>안 열어도 됩니다.</b> 열지 않아도 본문은 완결됩니다.</p>
+    <p>· 그림은 전부 <b>슬라이더를 밀고 버튼을 눌러보는</b> 용도입니다. 특히 <b>슬라이더를 끝까지 밀었을 때</b> 무슨 일이 나는지가 이 자료에서 제일 중요합니다.</p>
+    <p>· 각 장 끝의 <b>세 줄 요약</b>만 읽고 넘어가도 괜찮습니다.</p>
+    <p>· 영어 용어는 일부러 영어로 뒀습니다. 실무 문서와 에러 메시지가 전부 영어이기 때문입니다.</p>
+  </div>
+</section>
+
+<p class="recap">— Part 1. Introduction to Model Serving and Optimization —</p>
+
+<section id="ch-parts">
+  <h2><span class="num">01</span>모델은 무엇으로 이루어져 있나</h2>
+  <p class="sub">한 줄 요약: <b>모델은 데이터 파일이 아니라, 세 덩어리가 모여야 겨우 돌아가는 소프트웨어입니다.</b></p>
+
+  <div class="why">
+    <span class="t">왜 이걸 배우나</span>
+    <div class="q">"모델 파일을 받아서 서버에 올렸는데, 왜 이것만으로는 아무 일도 안 일어나지?"</div>
+    <p>모델을 다운로드하면 <code>model.safetensors</code> 같은 파일이 하나 나옵니다.
+    그런데 그 파일만 있으면 실행되지 않습니다. 뭔가가 더 필요합니다.</p>
+    <p style="margin-top:12px">이 장에서는 그 "뭔가"가 정확히 무엇인지, 그리고 왜 세 덩어리로 나눠서 보관하는지를 알게 됩니다.
+    이걸 알면 배포할 때 <b>무엇을 같이 챙겨 보내야 하는지</b>가 보입니다.</p>
+  </div>
+
+  <div class="terms">
+    <span class="t">이 장에 나오는 낯선 말</span>
+    <dl>
+      <dt>Inference (인퍼런스)</dt>
+      <dd>학습이 끝난 모델에 입력을 넣어 <em>답을 하나 뽑아내는 것</em>. 우리가 흔히 "모델을 돌린다"고 말하는 그 동작입니다.</dd>
+      <dt>Model Data</dt>
+      <dd>학습으로 얻어낸 <em>숫자 덩어리와 설정값</em>. weight, bias, embedding, 클래스 목록, 입출력 tensor 정의 같은 것들이 여기 들어갑니다.</dd>
+      <dt>Weight (가중치) · Bias (편향)</dt>
+      <dd>모델이 학습하면서 조금씩 고쳐 나간 <em>그냥 숫자들</em>입니다. weight는 "입력을 얼마나 크게 반영할지", bias는 "결과를 얼마나 밀어 올릴지"를 정합니다.</dd>
+      <dt>Model Architecture</dt>
+      <dd>모델 내부의 <em>설계도</em>. layer가 몇 개고 어떤 종류이며 어떤 순서로 연결되는지. 숫자는 안 들어 있고 <em>구조만</em> 들어 있습니다.</dd>
+      <dt>Model Execution Code</dt>
+      <dd>설계도대로 모델을 <em>조립하고, 숫자를 채워 넣고, 실제로 돌리는 코드</em>. 우리가 직접 쓰는 부분입니다.</dd>
+      <dt>Tensor (텐서)</dt>
+      <dd>숫자를 여러 겹으로 쌓아놓은 상자. 숫자 한 줄이면 1차원, 표 모양이면 2차원 — 그 이상도 됩니다. <em>모델이 주고받는 데이터의 기본 단위</em>입니다.</dd>
+      <dt><code>state_dict</code></dt>
+      <dd>PyTorch에서 weight와 bias만 모아둔 <em>사전(dictionary)</em>. "레이어 이름 → 숫자 뭉치" 형태입니다.</dd>
+      <dt><code>safetensors</code></dt>
+      <dd>weight를 저장하는 최신 표준 파일 형식. 예전 <code>.bin</code>(pickle 기반)과 달리 <em>불러올 때 임의 코드가 실행될 위험이 없고</em>, 로딩도 더 빠릅니다.</dd>
+    </dl>
+  </div>
+
+  <h3 style="margin-top:34px">비유 먼저 — 악보 · 연주 지시 · 연주자</h3>
+  <p>오케스트라 공연을 생각해 봅시다. 공연이 성립하려면 세 가지가 다 있어야 합니다.</p>
+  <p><b>악보의 구조</b>는 "1악장 다음에 2악장, 여기서 현악기가 들어온다"는 <b>순서와 배치</b>입니다.
+  이게 <b>model architecture</b>입니다. 소리는 안 나지만 순서를 정합니다.</p>
+  <p><b>각 음표에 적힌 숫자</b>는 "이 음은 얼마나 세게, 얼마나 길게"입니다.
+  이게 <b>model data</b>, 즉 weight와 bias입니다. 학습이란 이 숫자들을 조금씩 고쳐 나가는 과정이었습니다.</p>
+  <p><b>연주자</b>는 악보를 펼치고, 숫자를 읽고, 실제로 소리를 냅니다.
+  이게 <b>model execution code</b>입니다. 셋 중 하나라도 없으면 공연은 열리지 않습니다.</p>
+
+  <div class="note warn">
+    <span class="t">흔한 오해</span>
+    <p>"모델 = 큰 파일 하나"라고 생각하면, 배포했는데 실행이 안 되는 이유를 영영 못 찾습니다.
+    Hugging Face에서 모델을 받으면 <code>config.json</code>(architecture), <code>model.safetensors</code>(data),
+    <code>tokenizer.json</code>(입력 변환 규칙)이 <b>따로따로</b> 들어 있는 것도 이 때문입니다.</p>
+  </div>
+
+  <h3>작은 숫자로 한 번</h3>
+  <p>세상에서 제일 작은 모델을 만들어 봅시다. 입력 숫자 2개를 받아서 결과 1개를 내놓는 모델입니다.
+  layer는 딱 하나, 하는 일은 <b>곱하고 더하기</b>가 전부입니다.</p>
+
+  <div class="calc">
+<span class="cm">── model architecture (설계도) ──</span><br>
+입력 2개 → layer 1개 → 출력 1개<br>
+<br>
+<span class="cm">── model data (학습으로 얻은 숫자) ──</span><br>
+weight = [0.5, -1.2]&nbsp;&nbsp;<span class="cm">// 입력 두 개에 각각 곱할 수</span><br>
+bias&nbsp;&nbsp; = 0.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">// 마지막에 더할 수</span><br>
+<br>
+<span class="cm">── model execution code (실행) ──</span><br>
+입력 = [4, 1]<br>
+&nbsp;&nbsp;0.5 × 4&nbsp; = 2.0<br>
+&nbsp;&nbsp;-1.2 × 1 = -1.2<br>
+&nbsp;&nbsp;합&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= 0.8<br>
+&nbsp;&nbsp;+ bias&nbsp;&nbsp;&nbsp;= 0.3<br>
+출력 = <span class="hl">1.1</span>
+  </div>
+
+  <p>GPT급 모델이라고 원리가 달라지지 않습니다. <b>곱하고 더하는 일이 수천억 번 반복될 뿐</b>입니다.
+  weight가 1,750억 개라는 말은, 위 <code>0.5</code>와 <code>-1.2</code> 같은 숫자가 1,750억 개 있다는 뜻입니다.</p>
+
+  <div class="demo">
+    <div class="demo-head"><span class="tag">그림 1</span><h4>세 덩어리 조립기 — 하나라도 빠지면 무슨 일이 나는가</h4>
+      <span class="hint">↔ 버튼 + 슬라이더</span></div>
+    <div class="todo">해볼 것 — <b>①</b> 버튼 세 개를 하나씩 꺼보세요. 무엇이 빠졌을 때 어떤 에러가 나는지 캔버스에 뜹니다.
+    <b>②</b> 슬라이더로 weight를 바꾸면 출력 숫자가 즉시 따라옵니다. "학습"이란 이 슬라이더를 자동으로 돌리는 일입니다.
+    <b>③</b> weight를 양쪽 끝까지 밀어보세요. 구조는 그대로인데 결과만 달라집니다 — architecture와 data가 왜 다른 것인지 여기서 보입니다.</div>
+    <div class="stage">
+      <div class="canvas-wrap"><canvas id="cv-parts" height="340"></canvas></div>
+      <div class="side">
+        <div class="ctrl">
+          <label>weight 1 <b id="lb-parts-w1">0.50</b></label>
+          <input type="range" id="sl-parts-w1" min="-2" max="2" step="0.05" value="0.5">
+          <label>weight 2 <b id="lb-parts-w2">-1.20</b></label>
+          <input type="range" id="sl-parts-w2" min="-2" max="2" step="0.05" value="-1.2">
+          <div class="btnrow" style="margin-top:6px">
+            <button id="btn-parts-arch" class="on">architecture</button>
+            <button id="btn-parts-data" class="on">data</button>
+            <button id="btn-parts-code" class="on">code</button>
+          </div>
+        </div>
+        <div class="readout" id="ro-parts"></div>
+        <div class="note ok" style="margin:0; font-size:13.5px">
+          <span class="t">관찰 포인트</span>
+          <p>세 개가 다 켜져 있을 때만 초록색 출력이 나옵니다. 하나라도 끄면 실무에서 실제로 만나는 에러 문구가 뜹니다.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h3>왜 굳이 따로 저장하나</h3>
+  <p>전체 모델을 파일 하나로 통째로 저장할 수도 있습니다. 그런데 현장에서는 대부분 나눠서 저장합니다.</p>
+  <ol class="steps">
+    <li><b>버전을 갈아끼우기 쉽습니다</b>
+      <span>architecture는 그대로 두고 weight만 새것으로 교체하면 됩니다. 반대도 됩니다.</span></li>
+    <li><b>일부만 골라 불러올 수 있습니다</b>
+      <span>새 구조와 기존 checkpoint 사이에 이름이 안 맞는 부분이 있어도, 맞는 것만 골라 로드할 수 있습니다.</span></li>
+    <li><b>fine-tuning과 layer 추가가 쉬워집니다</b>
+      <span>기존 weight를 그대로 두고 뒤에 layer를 붙이는 식의 작업이 자연스러워집니다.</span></li>
+  </ol>
+
+  <p>Hugging Face 모델 폴더를 열어보면 이 원칙이 그대로 보입니다.</p>
+  <div class="tscroll"><table>
+    <tr><th style="width:210px">파일</th><th style="width:130px">어느 덩어리</th><th>담고 있는 것</th></tr>
+    <tr><td><code>config.json</code></td><td>architecture</td><td>layer 수, hidden size, attention head 수 등. 이 파일만으로 구조를 다시 세울 수 있습니다.</td></tr>
+    <tr><td><code>generation_config.json</code></td><td>architecture</td><td>텍스트 생성 기본값 — <code>max_length</code>, <code>temperature</code>, <code>top_p</code></td></tr>
+    <tr><td><code>model.safetensors</code></td><td>data</td><td>weight 본체. 최신 표준 형식이고, 로딩이 빠르며 안전합니다.</td></tr>
+    <tr><td><code>pytorch_model.bin</code></td><td>data</td><td>예전 형식. pickle 기반이라 불러올 때 코드가 실행될 위험이 있습니다.</td></tr>
+    <tr><td><code>tokenizer.json</code></td><td>data</td><td>글자를 숫자로 바꾸는 규칙(vocab + merge rules). LLM에서는 필수입니다.</td></tr>
+  </table></div>
+
+  <details class="more">
+    <summary>PyTorch 코드로도 보고 싶다면</summary>
+    <div class="body">
+      <div class="f">torch.save(model.state_dict(), "model_weights.pt")</div>
+      <p>이 한 줄이 <b>model data만</b> 뽑아 저장합니다. <code>state_dict()</code>는
+      "레이어 이름 → weight 숫자 뭉치" 형태의 사전입니다. 구조는 여기 안 들어갑니다.</p>
+      <div class="f">model = TheModelClass()<br>
+model.load_state_dict(torch.load("model_weights.pt", weights_only=True))<br>
+model.eval()<br>
+pred = model(inputs)</div>
+      <p>읽는 법 — 1줄: <b>architecture</b>로 빈 모델을 만듭니다(숫자는 아직 랜덤).
+      2줄: 저장해둔 <b>data</b>를 부어 넣습니다. 3줄: <code>eval()</code>은 "이제 학습 안 하고 예측만 한다"는 스위치입니다.
+      4줄: <b>inference</b> 실행. 이 네 줄이 <b>model execution code</b> 전부입니다.</p>
+      <p>서빙 환경에는 <code>TheModelClass</code> 정의가 <b>반드시 같이 있어야</b> 합니다.
+      weight 파일만 복사해 놓고 실행이 안 되는 사고는 거의 전부 이것 때문입니다.</p>
+    </div>
+  </details>
+
+  <div class="sum">
+    <span class="t">1장 세 줄 요약</span>
+    <ol>
+      <li><b>정의</b> — 모델은 <b>model data(숫자) + model architecture(설계도) + model execution code(실행 코드)</b> 세 덩어리로 이루어진 실행 가능한 소프트웨어입니다.</li>
+      <li><b>성질</b> — 셋은 따로 저장합니다. 그래야 버전 교체, 부분 로딩, fine-tuning이 가능해집니다.</li>
+      <li><b>쓰임</b> — 배포할 때 "weight 파일만 올리면 되겠지"라고 생각하면 반드시 막힙니다. 세 덩어리를 다 챙겨야 합니다.</li>
+    </ol>
+  </div>
+</section>
+
+<p class="recap">— 여기까지: 모델은 세 덩어리다. 다음은 그 모델이 만들어져서 서비스에 도달하기까지의 전체 경로 —</p>
+
+<section id="ch-lifecycle">
+  <h2><span class="num">02</span>모델 생명주기 — 학습에서 서빙까지</h2>
+  <p class="sub">한 줄 요약: <b>학습과 서빙은 같은 모델을 다루지만, 신경 쓰는 지표가 완전히 다릅니다.</b></p>
+
+  <div class="why">
+    <span class="t">왜 이걸 배우나</span>
+    <div class="q">"학습이 끝나면 그다음엔 대체 누가 무엇을 하는 걸까?"</div>
+    <p>ML 자료는 대부분 "정확도 92% 달성!"에서 끝납니다. 그런데 회사에서 그 다음에 벌어지는 일이
+    실은 훨씬 길고, 그 구간을 담당하는 게 개발자입니다.</p>
+    <p style="margin-top:12px">이 장에서는 전체 경로에서 <b>모델 서빙이 정확히 어디에 놓이는지</b>,
+    그리고 앞 단계(학습)와 무엇이 다른지를 알게 됩니다.</p>
+  </div>
+
+  <div class="terms">
+    <span class="t">이 장에 나오는 낯선 말</span>
+    <dl>
+      <dt>Training (학습)</dt>
+      <dd>데이터를 보여주면서 weight 숫자를 조금씩 고쳐 나가는 단계. <em>1장의 슬라이더를 자동으로 돌리는 일</em>입니다.</dd>
+      <dt>Loss (손실)</dt>
+      <dd>모델의 답이 정답에서 <em>얼마나 빗나갔는지를 나타내는 하나의 숫자</em>. 작을수록 좋습니다.</dd>
+      <dt>Benchmark (벤치마크)</dt>
+      <dd>여러 모델을 <em>같은 시험지로 채점</em>해 비교하는 표준 문제 모음.</dd>
+      <dt>Deployment (배포)</dt>
+      <dd>모델을 <em>버전이 붙은 소프트웨어 산출물로 포장</em>하는 단계. 컨테이너 이미지로 만드는 작업이 여기 속합니다.</dd>
+      <dt>Serving (서빙)</dt>
+      <dd>포장된 모델이 <em>실제 요청을 받아 예측을 돌려주는 운영 단계</em>. 이 글의 주제입니다.</dd>
+      <dt>Latency (지연시간)</dt>
+      <dd>요청 하나가 <em>답을 받기까지 걸린 시간</em>. 사용자가 체감하는 "느림"입니다.</dd>
+      <dt>Throughput (처리량)</dt>
+      <dd><em>일정 시간에 처리한 요청 수</em>. 서버가 얼마나 많이 감당하는지를 나타냅니다.</dd>
+      <dt>Retraining (재학습)</dt>
+      <dd>운영하면서 쌓인 실제 데이터를 <em>다시 학습에 넣는 것</em>. 생명주기가 "주기"인 이유입니다.</dd>
+    </dl>
+  </div>
+
+  <h3 style="margin-top:34px">비유 먼저 — 신입 요리사</h3>
+  <p><b>학습</b>은 요리 학교에서 수천 번 연습하는 기간입니다. 재료를 낭비해도 되고, 시간이 오래 걸려도 됩니다.
+  중요한 건 <b>얼마나 잘하게 되었는가</b> 하나뿐입니다.</p>
+  <p><b>서빙</b>은 점심시간 매장에 배치된 상태입니다. 실력은 이미 정해졌습니다.
+  이제 중요한 건 <b>주문이 몰릴 때 몇 분 만에 나가는가, 하루 인건비가 얼마인가, 한 명이 쓰러져도 매장이 돌아가는가</b>입니다.</p>
+  <p>같은 사람인데 평가 기준이 통째로 바뀝니다. 학습과 서빙의 관계가 정확히 이렇습니다.</p>
+
+  <div class="demo">
+    <div class="demo-head"><span class="tag">그림 2</span><h4>생명주기 링 — 지금 어느 단계이고 무엇을 신경 쓰는가</h4>
+      <span class="hint">↔ 슬라이더 + 클릭</span></div>
+    <div class="todo">해볼 것 — <b>①</b> 슬라이더를 돌리거나 원 위의 단계를 <b>직접 클릭</b>해 보세요. 그 단계에서 담당자가 무엇을 보는지 오른쪽에 뜹니다.
+    <b>②</b> 파란 구간(학습 쪽)과 초록 구간(서빙 쪽)의 지표 목록이 어떻게 달라지는지 비교해 보세요.
+    <b>③</b> 마지막 단계까지 밀면 화살표가 다시 처음으로 돌아갑니다. "주기"인 이유입니다.</div>
+    <div class="stage">
+      <div class="canvas-wrap"><canvas id="cv-life" height="400"></canvas></div>
+      <div class="side">
+        <div class="ctrl">
+          <label>단계 <b id="lb-life">1 / 7</b></label>
+          <input type="range" id="sl-life" min="0" max="6" step="1" value="0">
+        </div>
+        <div class="readout" id="ro-life"></div>
+        <div class="note ok" style="margin:0; font-size:13.5px">
+          <span class="t">관찰 포인트</span>
+          <p>Deployment를 기점으로 지표가 <b>정확도 계열 → 시간·비용 계열</b>로 완전히 바뀝니다.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h3>학습과 서빙은 무엇이 다른가</h3>
+  <div class="tscroll"><table>
+    <tr><th style="width:150px">구분</th><th style="width:210px">Training</th><th>Serving</th></tr>
+    <tr><td>목표</td><td>정확도를 올리는 것</td><td>정해진 시간·비용 안에 답을 내놓는 것</td></tr>
+    <tr><td>핵심 지표</td><td>accuracy, loss, benchmark 점수</td><td>latency, throughput, 안정성, cost, 보안</td></tr>
+    <tr><td>실패의 모습</td><td>정확도가 안 오름</td><td>느려짐 · 터짐 · 비용 폭증</td></tr>
+    <tr><td>시간 감각</td><td>며칠~몇 주 걸려도 됨</td><td>밀리초 단위로 따짐</td></tr>
+    <tr><td>주 담당</td><td>ML 엔지니어 · 리서처</td><td><b>개발자 · 인프라 엔지니어</b></td></tr>
+  </table></div>
+
+  <div class="note">
+    <span class="t">보충</span>
+    <p>생명주기의 마지막 <b>Retraining</b>은 서빙에서 나온 실제 요청 데이터를 다시 학습에 넣는 단계입니다.
+    그래서 서빙 단계에서 <b>무엇을 로그로 남길지</b>를 잘 설계해두면, 그게 다음 모델의 재료가 됩니다.</p>
+  </div>
+
+  <div class="sum">
+    <span class="t">2장 세 줄 요약</span>
+    <ol>
+      <li><b>정의</b> — 생명주기는 <b>데이터 수집 → training → evaluation → deployment → serving → monitoring → retraining</b>으로 돌아갑니다.</li>
+      <li><b>성질</b> — <b>serving</b>은 학습된 모델이 실제 요청을 받아 예측을 반환하는 운영 단계입니다.</li>
+      <li><b>쓰임</b> — training은 accuracy를 보고, serving은 latency·throughput·안정성·cost·보안을 봅니다. 지표가 바뀐다는 걸 알면 대화가 통합니다.</li>
+    </ol>
+  </div>
+</section>
+
+<p class="recap">— 여기까지: 서빙은 생명주기의 운영 구간이다. 다음은 그 안에서 요청 하나가 실제로 어떻게 흘러가는지 —</p>
+
+<section id="ch-serving">
+  <h2><span class="num">03</span>모델 서빙이란 무엇인가</h2>
+  <p class="sub">한 줄 요약: <b>요청을 받고 → 모델을 돌리고 → 결과를 돌려주는 것. 다만 그 사이에 신경 쓸 게 아주 많습니다.</b></p>
+
+  <div class="why">
+    <span class="t">왜 이걸 배우나</span>
+    <div class="q">"모델 서빙이라는 말은 결국 '웹 서버 하나 띄운다'는 뜻 아닌가?"</div>
+    <p>절반은 맞습니다. 하지만 일반 API 서버와 결정적으로 다른 점이 하나 있습니다.
+    LLM은 <b>답을 한 번에 만들지 않고, 토큰을 한 개씩 순서대로 뱉습니다.</b></p>
+    <p style="margin-top:12px">이 장에서는 요청 하나가 지나가는 경로와, LLM 특유의 지연시간 구조
+    <b>TTFT</b>와 <b>TPOT</b>를 알게 됩니다. 이 둘을 알면 "느리다"는 말을 숫자로 쪼갤 수 있습니다.</p>
+  </div>
+
+  <div class="terms">
+    <span class="t">이 장에 나오는 낯선 말</span>
+    <dl>
+      <dt>Token (토큰)</dt>
+      <dd>LLM이 글을 다루는 <em>최소 단위</em>. 대략 단어 조각 하나라고 생각하면 됩니다. 한국어는 보통 한 글자에 1~2 토큰입니다.</dd>
+      <dt>Endpoint (엔드포인트)</dt>
+      <dd>모델을 부를 수 있는 <em>주소</em>. <code>POST /v1/chat/completions</code> 같은 것.</dd>
+      <dt>gRPC</dt>
+      <dd>HTTP 대신 쓰는 <em>더 빠른 통신 규약</em>. 내부 서비스끼리 부를 때 자주 씁니다.</dd>
+      <dt>TTFT (Time To First Token)</dt>
+      <dd>요청을 보낸 뒤 <em>첫 글자가 화면에 뜨기까지</em>의 시간. 사용자가 "반응이 있다"고 느끼는 순간입니다.</dd>
+      <dt>TPOT (Time Per Output Token)</dt>
+      <dd><em>토큰 하나를 더 뱉는 데 걸리는 시간</em>. 글자가 흘러나오는 속도를 정합니다.</dd>
+      <dt>Streaming (스트리밍)</dt>
+      <dd>다 만든 뒤 한 번에 주지 않고, <em>만들어지는 대로 조금씩 흘려보내는</em> 방식.</dd>
+      <dt>KV Cache</dt>
+      <dd>이미 계산한 중간 결과를 <em>메모장에 적어두고 다시 안 계산하는</em> 장치. 이름만 기억해 두세요. 6장에서 다시 나옵니다.</dd>
+    </dl>
+  </div>
+
+  <h3 style="margin-top:34px">비유 먼저 — 주문이 주방까지 가는 길</h3>
+  <p>손님이 주문하면 <b>홀 직원</b>이 받아 적고(API server), <b>주방</b>에 전달하고(routing),
+  <b>요리사</b>가 만들고(model), <b>서빙 직원</b>이 가져다줍니다(response).</p>
+  <p>여기서 LLM이 특이한 점은, 요리가 <b>한 접시씩 완성되어 나온다</b>는 것입니다.
+  파스타 한 그릇을 통째로 주는 게 아니라 <b>면 한 가닥씩</b> 계속 내보냅니다.
+  첫 가닥이 나오기까지 걸린 시간이 <b>TTFT</b>, 그 뒤 한 가닥 간격이 <b>TPOT</b>입니다.</p>
+
+  <h3>작은 숫자로 한 번</h3>
+  <p>답변이 토큰 12개짜리라고 해봅시다. 첫 토큰까지 0.4초, 그 뒤로는 토큰 하나에 0.03초라면?</p>
+
+  <div class="calc">
+TTFT&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= 0.40초&nbsp;&nbsp;<span class="cm">// 첫 토큰까지</span><br>
+남은 토큰&nbsp;&nbsp;= 12 - 1 = 11개<br>
+TPOT&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= 0.03초<br>
+<span class="cm">──────────────────</span><br>
+11 × 0.03 = 0.33초<br>
+전체 = 0.40 + 0.33 = <span class="hl">0.73초</span>
+  </div>
+
+  <p>여기서 중요한 건, <b>같은 0.73초라도 체감이 다르다</b>는 점입니다.
+  TTFT가 0.1초이고 TPOT가 길면 "빠르게 시작해서 천천히 흐르는" 느낌이고,
+  TTFT가 0.7초이고 나머지가 순식간이면 "한참 멈췄다가 확 나오는" 느낌입니다.
+  뒤쪽이 훨씬 답답하게 느껴집니다.</p>
+
+  <div class="demo">
+    <div class="demo-head"><span class="tag">그림 3</span><h4>요청 하나의 여정 — TTFT와 TPOT를 눈으로 보기</h4>
+      <span class="hint">↔ 재생 버튼 + 슬라이더</span></div>
+    <div class="todo">해볼 것 — <b>①</b> <b>재생</b>을 눌러 요청이 Client → API Server → Model → 응답으로 흘러가는 걸 보세요.
+    <b>②</b> TTFT 슬라이더만 올려보세요. 앞부분 멈춤이 길어집니다. 이게 사용자가 제일 싫어하는 구간입니다.
+    <b>③</b> TPOT를 최대로 밀면 글자가 뚝뚝 끊겨 나옵니다. 반대로 최소로 밀면 순식간에 쏟아집니다.</div>
+    <div class="stage">
+      <div class="canvas-wrap"><canvas id="cv-flow" height="300"></canvas></div>
+      <div class="side">
+        <div class="ctrl">
+          <label>출력 토큰 수 <b id="lb-flow-n">12</b></label>
+          <input type="range" id="sl-flow-n" min="4" max="40" step="1" value="12">
+          <label>TTFT (초) <b id="lb-flow-ttft">0.40</b></label>
+          <input type="range" id="sl-flow-ttft" min="0.05" max="3" step="0.05" value="0.4">
+          <label>TPOT (초/토큰) <b id="lb-flow-tpot">0.030</b></label>
+          <input type="range" id="sl-flow-tpot" min="0.005" max="0.3" step="0.005" value="0.03">
+          <div class="btnrow" style="margin-top:6px">
+            <button id="btn-flow-play">▶ 재생</button>
+            <button id="btn-flow-reset">처음으로</button>
+          </div>
+        </div>
+        <div class="readout" id="ro-flow"></div>
+        <div class="note ok" style="margin:0; font-size:13.5px">
+          <span class="t">관찰 포인트</span>
+          <p>전체 시간이 같아도 <b>TTFT가 큰 쪽</b>이 훨씬 답답합니다. 그래서 두 지표를 나눠서 측정합니다.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h3>서빙이 실제로 챙기는 것들</h3>
+  <p>"요청 받고 모델 돌리고 응답" 사이에 실제로는 이런 것들이 들어갑니다.</p>
+  <ol class="steps">
+    <li><b>입력 검증과 전처리</b>
+      <span>텍스트를 토큰으로 바꾸고(tokenize), 길이 제한을 넘지 않는지 확인합니다.</span></li>
+    <li><b>배치 묶기와 스케줄링</b>
+      <span>여러 요청을 한 번에 GPU로 보내면 훨씬 효율적입니다. 누구를 언제 묶을지 정하는 게 scheduler입니다.</span></li>
+    <li><b>실행과 스트리밍</b>
+      <span>GPU에서 토큰을 하나씩 만들고, 만들어지는 대로 흘려보냅니다.</span></li>
+    <li><b>관측과 방어</b>
+      <span>지연시간·에러율을 기록하고, 과도한 요청을 막고, 인증을 확인합니다.</span></li>
+  </ol>
+
+  <div class="note warn">
+    <span class="t">이 책이 계속 강조하는 것</span>
+    <p>LLM 서빙에서는 일반 모델 서빙 지식만으로 부족합니다.
+    <b>토큰 생성 방식 · KV Cache · attention 비용 · batching · decoding · GPU memory 병목</b> 같은
+    LLM 고유의 성질을 알아야 성능과 비용을 제어할 수 있습니다.
+    그래서 <b>Transformer에 대한 탄탄한 이해가 사실상 전제 조건</b>입니다.</p>
+    <p style="margin-top:10px">뒤집어 말하면 — LLM 서빙 기술의 발전은 전부
+    <b>"LLM을 돌릴 때 생기는 병목을 어떻게 없앨까"</b>에서 나왔습니다.
+    구조를 알면 왜 그 기법이 생겼는지가 자연스럽게 보입니다.</p>
+  </div>
+
+  <div class="sum">
+    <span class="t">3장 세 줄 요약</span>
+    <ol>
+      <li><b>정의</b> — 모델 서빙은 <b>입력 요청 수신 → 모델 실행 → 예측 반환</b>을 API·웹 서비스 형태로 제공하는 과정입니다.</li>
+      <li><b>성질</b> — LLM은 토큰을 하나씩 뱉기 때문에 지연시간이 <b>TTFT</b>와 <b>TPOT</b> 둘로 쪼개집니다.</li>
+      <li><b>쓰임</b> — "느리다"는 민원이 오면 둘 중 어느 쪽인지부터 봅니다. 원인도 해법도 완전히 다릅니다.</li>
+    </ol>
+  </div>
+</section>
+<p class="recap">— 여기까지: 요청 하나가 지나가는 길. 다음은 "그걸 클라우드가 다 해주는데 왜 알아야 하나"에 대한 답 —</p>
+
+<section id="ch-why">
+  <h2><span class="num">04</span>왜 모델 서빙을 공부해야 하는가</h2>
+  <p class="sub">한 줄 요약: <b>모든 상황에 맞는 서빙 정답은 없습니다. 그래서 원리를 알아야 고를 수 있습니다.</b></p>
+
+  <div class="why">
+    <span class="t">왜 이걸 배우나</span>
+    <div class="q">"클라우드가 버튼 몇 번으로 다 해주는데, 굳이 내부를 알아야 할까?"</div>
+    <p>managed endpoint를 쓰면 확실히 편합니다. 그런데 편한 건 <b>배포</b>까지입니다.
+    그 뒤에 "왜 이렇게 느리죠?" "이번 달 청구서가 왜 이렇죠?"라는 질문이 오면,
+    버튼 몇 개로는 답이 안 나옵니다.</p>
+    <p style="margin-top:12px">이 장에서는 서빙에서 <b>반드시 저울질해야 하는 세 가지</b>가 무엇이고,
+    왜 셋을 동시에 만족시킬 수 없는지를 알게 됩니다.</p>
+  </div>
+
+  <div class="terms">
+    <span class="t">이 장에 나오는 낯선 말</span>
+    <dl>
+      <dt>Managed Endpoint</dt>
+      <dd>클라우드가 서버·확장·모니터링을 <em>대신 관리해 주는 모델 주소</em>. SageMaker Inference Endpoint 같은 것.</dd>
+      <dt>Autoscaling (오토스케일링)</dt>
+      <dd>트래픽이 늘면 <em>서버 대수를 자동으로 늘리고</em> 줄면 다시 줄이는 기능.</dd>
+      <dt>Routing (라우팅)</dt>
+      <dd>들어온 요청을 <em>어느 서버로 보낼지 정하는 일</em>. 8장에서 자세히 다룹니다.</dd>
+      <dt>SLA (Service Level Agreement)</dt>
+      <dd>"응답의 99%는 2초 안에" 같은 <em>지켜야 할 약속</em>. 못 지키면 계약·신뢰 문제가 됩니다.</dd>
+      <dt>Cost per request</dt>
+      <dd>요청 <em>1건을 처리하는 데 드는 돈</em>. 서빙의 성적표 중 가장 냉정한 숫자입니다.</dd>
+      <dt>Vendor lock-in</dt>
+      <dd>특정 업체 기술에 너무 묶여서 <em>나중에 옮기기 어려워지는 상태</em>.</dd>
+      <dt>GPU Utilization</dt>
+      <dd>비싼 GPU가 <em>실제로 일한 시간의 비율</em>. 낮으면 돈을 태우면서 놀리고 있는 겁니다.</dd>
+    </dl>
+  </div>
+
+  <h3 style="margin-top:34px">비유 먼저 — 자동변속기</h3>
+  <p>자동변속기 차는 평지에서는 아무 생각 없이 몰아도 됩니다.
+  그런데 <b>급경사에서 엔진이 울부짖을 때</b>, 변속기가 어떻게 동작하는지 아는 사람은
+  기어를 낮춰 해결합니다. 모르는 사람은 그냥 액셀만 더 밟습니다.</p>
+  <p>managed endpoint도 같습니다. 평상시엔 몰라도 됩니다.
+  문제가 생긴 그날, 아는 사람과 모르는 사람의 차이가 몇 배로 벌어집니다.</p>
+
+  <h3>클라우드를 써도 결국 내가 정해야 하는 것들</h3>
+  <ol class="steps">
+    <li><b>어떤 모델을 어떤 인프라에 올릴지</b>
+      <span>7B 모델을 A100에 올릴지 L4 여러 대에 올릴지 — 이건 아무도 대신 정해주지 않습니다.</span></li>
+    <li><b>latency와 throughput 목표를 어떻게 맞출지</b>
+      <span>둘은 서로 잡아당깁니다. 어느 쪽을 얼마나 포기할지는 서비스마다 다릅니다.</span></li>
+    <li><b>GPU · CPU · memory 비용을 어떻게 통제할지</b>
+      <span>GPU 활용률이 20%면 요금의 80%를 버리고 있는 것입니다.</span></li>
+    <li><b>autoscaling과 routing을 어떻게 설계할지</b>
+      <span>기준을 잘못 잡으면 늘 부족하거나 늘 남습니다.</span></li>
+    <li><b>모니터링 · 보안 · 장애 대응을 어떻게 구성할지</b>
+      <span>터졌을 때 어디를 볼지 미리 정해두지 않으면, 터진 다음엔 늦습니다.</span></li>
+  </ol>
+
+  <div class="demo">
+    <div class="demo-head"><span class="tag">그림 4</span><h4>세 개의 저울 — latency · throughput · cost는 동시에 못 잡는다</h4>
+      <span class="hint">↔ 슬라이더 3개</span></div>
+    <div class="todo">해볼 것 — <b>①</b> batch size를 키워 보세요. throughput 막대가 올라가는 대신 latency 막대도 같이 올라갑니다.
+    <b>②</b> GPU 대수를 늘리면 둘 다 좋아지지만 cost 막대가 따라 올라갑니다. <b>공짜 개선은 없습니다.</b>
+    <b>③</b> batch size를 1로, GPU를 최대로 밀어보세요. 제일 빠르지만 <b>GPU 활용률</b>이 바닥으로 떨어집니다 — 돈을 태우며 놀리는 상태입니다.</div>
+    <div class="stage">
+      <div class="canvas-wrap"><canvas id="cv-tradeoff" height="380"></canvas></div>
+      <div class="side">
+        <div class="ctrl">
+          <label>batch size <b id="lb-tr-batch">8</b></label>
+          <input type="range" id="sl-tr-batch" min="1" max="64" step="1" value="8">
+          <label>GPU 대수 <b id="lb-tr-gpu">2</b></label>
+          <input type="range" id="sl-tr-gpu" min="1" max="8" step="1" value="2">
+          <label>초당 도착 요청 <b id="lb-tr-load">20</b></label>
+          <input type="range" id="sl-tr-load" min="1" max="120" step="1" value="20">
+        </div>
+        <div class="bars" id="ro-tradeoff-bars"></div>
+        <div class="readout" id="ro-tradeoff"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="note ok">
+    <span class="t">이 장의 핵심 한 문장</span>
+    <p><b>"모든 상황에 맞는 하나의 서빙 솔루션은 없다."</b>
+    모델 크기, 트래픽 패턴, 보안 요구사항, 비용 구조, 지연시간 목표 — 이 다섯 개가 다르면 설계가 달라집니다.</p>
+  </div>
+
+  <p>그리고 기술은 계속 바뀝니다. 작년의 최적해가 올해는 아닙니다.
+  <b>기본기를 알아야 새 기술이 나왔을 때 장단점을 스스로 판단</b>할 수 있고,
+  특정 프레임워크나 벤더에 묶이지 않은 채 비즈니스에 유리한 선택을 할 수 있습니다.</p>
+
+  <div class="sum">
+    <span class="t">4장 세 줄 요약</span>
+    <ol>
+      <li><b>정의</b> — 서빙 설계는 <b>latency · throughput · cost</b> 세 개를 저울질하는 일입니다.</li>
+      <li><b>성질</b> — 셋은 서로 잡아당깁니다. 하나를 좋게 하면 대개 다른 하나가 나빠집니다. 정답은 서비스마다 다릅니다.</li>
+      <li><b>쓰임</b> — 클라우드를 쓰더라도 원리를 알아야 비용·보안·성능에서 최적의 판단을 내리고 vendor lock-in을 피할 수 있습니다.</li>
+    </ol>
+  </div>
+</section>
+
+<p class="recap">— 여기까지: 저울질이 서빙의 본질이다. 다음은 LLM에서 그 저울이 왜 유독 무섭게 기울어지는지 —</p>
+
+<section id="ch-optimize">
+  <h2><span class="num">05</span>LLM 서빙 최적화가 중요한 이유</h2>
+  <p class="sub">한 줄 요약: <b>데모에서 잘 돌던 시스템이 실제 유저 앞에서 무너지는 건, 대기줄이 쌓이는 속도 때문입니다.</b></p>
+
+  <div class="why">
+    <span class="t">왜 이걸 배우나</span>
+    <div class="q">"내부 데모에선 1초 만에 답했는데, 왜 유저 100명이 들어오니 30초가 걸리지?"</div>
+    <p>서버 성능이 갑자기 나빠진 게 아닙니다. 모델도 그대로입니다.
+    달라진 건 <b>줄을 서는 사람의 수</b> 하나뿐입니다.</p>
+    <p style="margin-top:12px">이 장에서는 왜 부하가 조금만 늘어도 지연시간이 <b>완만하게가 아니라 절벽처럼</b> 나빠지는지를
+    직접 만져보며 확인합니다. 이걸 보고 나면 "최적화는 나중에"라는 말이 안 나옵니다.</p>
+  </div>
+
+  <div class="terms">
+    <span class="t">이 장에 나오는 낯선 말</span>
+    <dl>
+      <dt>Queue (큐) · 대기열</dt>
+      <dd>처리되기를 기다리는 <em>요청들이 서 있는 줄</em>.</dd>
+      <dt>Arrival rate (도착률)</dt>
+      <dd><em>1초에 몇 건이 들어오는가</em>. 손님이 오는 속도입니다.</dd>
+      <dt>Service rate (처리율)</dt>
+      <dd><em>1초에 몇 건을 처리할 수 있는가</em>. 계산대의 속도입니다.</dd>
+      <dt>Tail latency · p99</dt>
+      <dd>느린 쪽 <em>상위 1%가 겪은 지연시간</em>. 평균은 멀쩡한데 일부 사용자만 30초 기다리는 상황을 잡아냅니다.</dd>
+      <dt>Cost per request</dt>
+      <dd>요청 1건당 드는 돈. 4장에서 나왔습니다.</dd>
+      <dt>Saturation (포화)</dt>
+      <dd>도착률이 처리율을 넘어 <em>줄이 영원히 줄지 않는 상태</em>. 여기 들어가면 지연시간은 시간이 갈수록 계속 커집니다.</dd>
+    </dl>
+  </div>
+
+  <h3 style="margin-top:34px">비유 먼저 — 계산대 하나짜리 마트</h3>
+  <p>계산에 1인당 6초가 걸리는 계산대가 하나 있습니다. 1분에 최대 10명입니다.</p>
+  <p>손님이 1분에 <b>8명</b> 오면 줄은 짧게 유지됩니다.
+  <b>9명</b>이면 조금 길어지지만 버팁니다.
+  그런데 <b>11명</b>이 오는 순간, 줄은 <b>영원히 줄어들지 않습니다.</b>
+  1분마다 1명씩 계속 쌓이기 때문입니다. 10명과 11명의 차이는 10%인데, 결과는 "괜찮음"과 "붕괴"입니다.</p>
+
+  <h3>작은 숫자로 한 번</h3>
+  <div class="calc">
+GPU 1대가 요청 1건에 0.5초&nbsp;&nbsp;→ 처리율 = 초당 <span class="hl">2건</span><br>
+<br>
+<span class="cm">── 경우 A: 초당 1.5건 도착 ──</span><br>
+2 - 1.5 = 0.5&nbsp;&nbsp;<span class="cm">// 여유가 남음 → 줄이 안 쌓임</span><br>
+<br>
+<span class="cm">── 경우 B: 초당 3건 도착 ──</span><br>
+3 - 2 = 1&nbsp;&nbsp;<span class="cm">// 매초 1건씩 밀림</span><br>
+60초 뒤 대기 = 60건<br>
+대기시간 = 60 ÷ 2 = <span class="hl">30초</span><br>
+<span class="cm">// 5분 뒤에는? 150초. 계속 커집니다.</span>
+  </div>
+
+  <p>도착률이 처리율의 <b>1.5배</b>가 되었을 뿐인데, 지연시간은 <b>시간이 갈수록 무한히 커집니다.</b>
+  이게 "데모는 됐는데 런칭하면 무너진다"의 정체입니다.</p>
+
+  <div class="demo">
+    <div class="demo-head"><span class="tag">그림 5</span><h4>대기열 절벽 — 부하 10%가 지연시간 10배가 되는 순간</h4>
+      <span class="hint">↔ 드래그 + 슬라이더</span></div>
+    <div class="todo">해볼 것 — <b>①</b> 파란 점을 <b>직접 끌어</b> 도착률(가로)과 처리율(세로)을 바꿔보세요. 점이 <b>붉은 선 아래</b>로 내려가면 포화입니다.
+    <b>②</b> 도착률을 처리율 <b>바로 아래</b>까지만 천천히 올려보세요. 곡선이 조용히 있다가 갑자기 치솟습니다 — 이게 절벽입니다.
+    <b>③</b> 최적화 배수 슬라이더를 올리면 처리율이 통째로 올라갑니다. <b>하드웨어는 그대로인데</b> 절벽이 오른쪽으로 밀려납니다.</div>
+    <div class="stage">
+      <div class="canvas-wrap"><canvas id="cv-queue" height="400"></canvas></div>
+      <div class="side">
+        <div class="ctrl">
+          <label>도착률 (건/초) <b id="lb-q-arr">7.0</b></label>
+          <input type="range" id="sl-q-arr" min="0.5" max="19" step="0.1" value="7">
+          <label>기본 처리율 (건/초) <b id="lb-q-srv">10.0</b></label>
+          <input type="range" id="sl-q-srv" min="1" max="19" step="0.1" value="10">
+          <label>최적화 배수 <b id="lb-q-opt">1.0×</b></label>
+          <input type="range" id="sl-q-opt" min="1" max="6" step="0.1" value="1">
+        </div>
+        <div class="readout" id="ro-queue"></div>
+        <div class="note ok" style="margin:0; font-size:13.5px">
+          <span class="t">관찰 포인트</span>
+          <p>곡선이 치솟기 <b>직전</b> 지점이 실제 운영 한계입니다. 여기에 여유를 안 두면 트래픽이 조금만 튀어도 무너집니다.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h3>그래서 최적화란 무엇을 뜻하나</h3>
+  <p><b>모델 서빙 최적화</b>는 지연시간을 줄이고, 처리량을 늘리고, 자원 활용도를 높여
+  서빙 성능을 끌어올리는 작업입니다. 구체적으로는 이 여섯 개를 봅니다.</p>
+  <div class="tscroll"><table>
+    <tr><th style="width:220px">지표</th><th>좋은 방향</th></tr>
+    <tr><td>latency</td><td>낮게 — 사용자가 덜 기다림</td></tr>
+    <tr><td>throughput</td><td>높게 — 같은 장비로 더 많이 처리</td></tr>
+    <tr><td>GPU utilization</td><td>높게 — 비싼 장비를 안 놀림</td></tr>
+    <tr><td>cost per request</td><td>낮게 — 요청 1건당 원가</td></tr>
+    <tr><td>tail latency (p99)</td><td>안정적으로 — 일부 사용자만 오래 기다리는 일 없게</td></tr>
+    <tr><td>memory 사용</td><td>효율적으로 — 같은 메모리로 더 많은 요청 수용</td></tr>
+  </table></div>
+  <p><b>목표는 하나입니다.</b> 비용을 통제하면서 서빙 효율을 최대로 끌어올리는 것.</p>
+
+  <div class="note warn">
+    <span class="t">왜 유독 LLM에서 중요한가</span>
+    <p>LLM은 연산 요구량이 압도적으로 커서 운영 비용 부담이 큽니다.
+    Alphabet 회장 John Hennessy는 2023년 로이터 인터뷰에서
+    <b>"LLM 요청 1건 처리 비용이 전통적인 키워드 검색보다 10배 비쌀 수 있고,
+    이는 수십억 달러 규모의 추가 비용으로 이어질 수 있다"</b>고 말했습니다.</p>
+    <p style="margin-top:10px">그래서 LLM에서 최적화는 "성능을 조금 더 짜내는 선택지"가 아니라
+    <b>서비스를 유지할 수 있느냐의 문제</b>에 가깝습니다.</p>
+  </div>
+
+  <div class="sum">
+    <span class="t">5장 세 줄 요약</span>
+    <ol>
+      <li><b>정의</b> — 최적화는 latency를 낮추고 throughput과 자원 활용도를 높여 <b>비용 대비 효율</b>을 끌어올리는 작업입니다.</li>
+      <li><b>성질</b> — 도착률이 처리율에 가까워지면 지연시간은 완만하게가 아니라 <b>절벽처럼</b> 나빠집니다. 그래서 여유를 남겨야 합니다.</li>
+      <li><b>쓰임</b> — LLM은 요청 1건 원가가 크기 때문에, 최적화가 곧 서비스의 지속 가능성입니다.</li>
+    </ol>
+  </div>
+</section>
+
+<p class="recap">— 여기까지: 절벽이 왜 생기는가. 다음은 그 절벽을 오른쪽으로 밀어내는 실제 도구 —</p>
+
+<section id="ch-vllm">
+  <h2><span class="num">06</span>vLLM — 설정값 하나가 성능을 바꾼다</h2>
+  <p class="sub">한 줄 요약: <b>같은 GPU, 같은 모델인데 설정 두 개만 바꿔서 15배가 나온 사례가 있습니다.</b></p>
+
+  <div class="why">
+    <span class="t">왜 이걸 배우나</span>
+    <div class="q">"같은 A100에 같은 7B 모델을 올렸는데, 왜 저쪽 팀은 우리보다 10배 빠를까?"</div>
+    <p>모델도 같고 GPU도 같은데 결과가 다르면, 남은 변수는 <b>어떻게 돌렸는가</b>뿐입니다.
+    그 "어떻게"를 담당하는 게 <b>serving engine</b>이고, 대표 주자가 <b>vLLM</b>입니다.</p>
+    <p style="margin-top:12px">이 장에서는 vLLM이 무엇을 다르게 하는지, 그리고 서버를 띄울 때 넣는
+    <b>옵션 하나하나가 성능을 어떻게 바꾸는지</b>를 직접 밀어보며 확인합니다.</p>
+  </div>
+
+  <div class="terms">
+    <span class="t">이 장에 나오는 낯선 말</span>
+    <dl>
+      <dt>vLLM</dt>
+      <dd>LLM 전용 <em>추론·서빙 엔진</em>. "높은 throughput과 메모리 효율"을 목표로 만들어진 오픈소스입니다.</dd>
+      <dt>KV Cache</dt>
+      <dd>이미 계산한 토큰의 중간 결과를 <em>저장해두고 재사용</em>하는 메모리. 대화가 길어질수록 이게 커지고, GPU 메모리를 제일 많이 잡아먹습니다.</dd>
+      <dt>PagedAttention</dt>
+      <dd>KV Cache를 <em>작은 조각(page)으로 쪼개서</em> 관리하는 기법. 빈 공간 낭비를 크게 줄입니다. vLLM에서 기본으로 켜져 있습니다.</dd>
+      <dt>Continuous Batching (동적 배칭)</dt>
+      <dd>먼저 온 요청들이 다 끝날 때까지 기다리지 않고, <em>끝난 자리에 새 요청을 바로 끼워 넣는</em> 방식.</dd>
+      <dt>dtype · fp16 / bf16 / fp8</dt>
+      <dd>숫자 하나를 <em>몇 비트로 표현할지</em>. 비트가 적을수록 메모리를 덜 쓰고 빨라지지만, 정밀도를 조금 잃습니다.</dd>
+      <dt><code>--gpu-memory-utilization</code></dt>
+      <dd>GPU 메모리를 <em>몇 %까지 쓸 것인가</em>. 높이면 KV Cache 공간이 늘어 더 많은 요청을 담지만, 너무 높이면 터집니다.</dd>
+      <dt><code>--max-num-seqs</code></dt>
+      <dd><em>동시에 처리할 요청(sequence) 최대 개수</em>. 사실상 batch size입니다.</dd>
+      <dt>Tensor Parallelism · <code>--tensor-parallel-size</code></dt>
+      <dd>모델 하나를 <em>GPU 여러 장에 쪼개 나눠 싣는 것</em>. 혼자서는 안 들어가는 큰 모델을 올릴 때 씁니다.</dd>
+      <dt>OOM (Out Of Memory)</dt>
+      <dd>메모리가 모자라서 <em>프로세스가 죽는 것</em>. 서빙에서 제일 자주 만나는 사고입니다.</dd>
+    </dl>
+  </div>
+
+  <h3 style="margin-top:34px">비유 먼저 — 버스와 사물함</h3>
+  <p><b>Continuous batching은 버스입니다.</b> 승객 한 명당 택시를 부르면 도로가 마비됩니다.
+  버스에 여럿을 태우면 한 번에 옮길 수 있습니다. 다만 버스를 꽉 채우려고 기다리면
+  먼저 탄 사람이 오래 기다립니다. <b>그래서 vLLM은 정류장에 서서 기다리지 않고,
+  내린 자리에 바로 다음 사람을 태웁니다.</b></p>
+  <p><b>PagedAttention은 사물함입니다.</b> 짐 크기가 제각각인데 사물함을 큰 것 하나만 주면,
+  작은 짐을 넣은 칸은 대부분 빈 공간이 됩니다.
+  칸을 잘게 나눠서 필요한 만큼만 쓰게 하면 같은 벽면에 훨씬 많은 짐이 들어갑니다.
+  <b>KV Cache를 이렇게 관리하는 게 PagedAttention</b>입니다.</p>
+
+  <h3>vLLM은 실제로 어떻게 띄우나</h3>
+  <p>파이썬에서 직접 부르는 방법과, OpenAI 호환 서버로 띄우는 방법 두 가지가 있습니다.</p>
+
+  <div class="calc">
+<span class="cm"># ① Python API — 코드 안에서 직접</span><br>
+llm = LLM(<br>
+&nbsp;&nbsp;model="Qwen/Qwen3-7B-Instruct",<br>
+&nbsp;&nbsp;dtype="float16",<br>
+&nbsp;&nbsp;max_model_len=32768,<br>
+&nbsp;&nbsp;gpu_memory_utilization=0.8,<br>
+)<br>
+outputs = llm.generate(prompts, sampling)<br>
+<br>
+<span class="cm"># ② OpenAI 호환 서버 — 기존 코드를 그대로 재사용</span><br>
+vllm serve Qwen/Qwen3-7B-Instruct \<br>
+&nbsp;&nbsp;--dtype bfloat16 \<br>
+&nbsp;&nbsp;--max-model-len 32768 \<br>
+&nbsp;&nbsp;--gpu-memory-utilization 0.8<br>
+<br>
+<span class="cm"># 그러면 이렇게 부를 수 있습니다</span><br>
+curl http://localhost:8000/v1/chat/completions ...
+  </div>
+
+  <p>②가 실무에서 특히 유용합니다. <b>OpenAI SDK를 쓰던 코드에서 주소만 바꾸면</b>
+  그대로 우리 GPU의 모델을 부르게 됩니다.</p>
+
+  <div class="demo">
+    <div class="demo-head"><span class="tag">그림 6</span><h4>vLLM 설정 놀이터 — 옵션을 밀면 무슨 일이 나는가</h4>
+      <span class="hint">↔ 슬라이더 + 버튼</span></div>
+    <div class="todo">해볼 것 — <b>①</b> <code>--max-num-seqs</code>를 키우면 throughput이 올라가는 대신 요청 하나의 latency도 같이 올라갑니다.
+    <b>②</b> <code>--gpu-memory-utilization</code>을 <b>0.98까지</b> 밀어보세요. KV Cache 공간은 커지지만 여유가 사라져 <b>OOM 경고</b>가 뜹니다.
+    <b>③</b> dtype을 fp16 → fp8로 바꿔보세요. 같은 GPU에 두 배 가까이 담깁니다. <b>④</b> tensor-parallel을 올리면 큰 모델이 들어가지만 GPU 간 통신 비용이 붙습니다.</div>
+    <div class="stage">
+      <div class="canvas-wrap"><canvas id="cv-vllm" height="285"></canvas></div>
+      <div class="side">
+        <div class="ctrl">
+          <label>--max-num-seqs <b id="lb-v-seqs">16</b></label>
+          <input type="range" id="sl-v-seqs" min="1" max="128" step="1" value="16">
+          <label>--gpu-memory-utilization <b id="lb-v-util">0.90</b></label>
+          <input type="range" id="sl-v-util" min="0.3" max="0.99" step="0.01" value="0.9">
+          <label>--tensor-parallel-size <b id="lb-v-tp">1</b></label>
+          <input type="range" id="sl-v-tp" min="1" max="8" step="1" value="1">
+          <div class="btnrow" style="margin-top:6px">
+            <button id="btn-v-fp16" class="on">fp16</button>
+            <button id="btn-v-bf16">bf16</button>
+            <button id="btn-v-fp8">fp8</button>
+          </div>
+        </div>
+        <div class="bars" id="ro-vllm-bars"></div>
+        <div class="readout" id="ro-vllm"></div>
+      </div>
+    </div>
+  </div>
+
+  <h3>vLLM 내부는 어떻게 생겼나</h3>
+  <p>이름만 훑어두면 됩니다. <b>책 8장</b>에서 다시 만납니다. (이 페이지의 8장이 아니라 원서 8장입니다.)</p>
+  <div class="tscroll"><table>
+    <tr><th style="width:210px">구성 요소</th><th>하는 일</th></tr>
+    <tr><td><b>LLMEngine</b></td><td>사용자가 부르는 API와 엔진 속을 이어주는 <b>조율 계층</b></td></tr>
+    <tr><td><b>EngineCore</b></td><td>scheduler · KV cache manager · model executor를 <b>조율</b></td></tr>
+    <tr><td><b>Scheduler</b></td><td>어떤 요청을 <b>이번 회차에 넣을지</b> 결정 — continuous batching의 두뇌</td></tr>
+    <tr><td><b>ModelExecutor</b></td><td>worker 프로세스 관리와 <b>분산 실행</b> 담당</td></tr>
+    <tr><td><b>GPUWorker / GPUModelRunner</b></td><td>GPU에서 <b>실제 계산</b>을 수행</td></tr>
+  </table></div>
+
+  <h3>숫자로 확인된 차이</h3>
+  <p>vLLM 팀이 2023년에 공개한 실험(A10G의 Llama-7B, A100 40GB의 Llama-13B)에서는
+  <b>HF Transformers 대비 최대 24배</b>, <b>HF TGI 대비 최대 3.5배</b> 처리량이 나왔습니다.
+  (그래프 기준으로는 HF 대비 8.5~15배, TGI 대비 3.3~3.5배입니다.)</p>
+  <p>책 저자들의 DeepSeek R1 실험은 더 극적입니다. <b>설정을 두 개만 바꿔서</b> —
+  FP8 MLA 커널을 켜고 batch size를 키운 것 — <b>38 TPS에서 600 TPS로 15배</b>가 되었습니다.</p>
+
+  <div class="note ok">
+    <span class="t">이 장에서 가져갈 한 문장</span>
+    <p>GPU는 비쌉니다. <b>인프라를 하나도 안 늘리고 설정만으로 처리량이 몇 배가 된다면</b>,
+    그건 성능 튜닝이 아니라 <b>예산 결정</b>입니다.
+    서빙 프레임워크의 설정값 하나하나가 잠재적 최적화 포인트입니다.</p>
+  </div>
+
+  <details class="more">
+    <summary>실제 실행 명령을 통째로 보고 싶다면</summary>
+    <div class="body">
+      <div class="f">python -m vllm.entrypoints.openai.api_server \<br>
+&nbsp;&nbsp;--model openai/gpt-oss-20b \<br>
+&nbsp;&nbsp;--dtype bf16 \<br>
+&nbsp;&nbsp;--gpu-memory-utilization 0.9 \<br>
+&nbsp;&nbsp;--max-num-seqs 16 \<br>
+&nbsp;&nbsp;--max-num-batched-tokens 16384 \<br>
+&nbsp;&nbsp;--tensor-parallel-size 2</div>
+      <p>읽는 법 — gpt-oss 20B 모델을 H100 80GB 두 장에 올리는 설정입니다.
+      <code>--dtype bf16</code>은 계산 정밀도, <code>--max-num-batched-tokens</code>는
+      한 배치에 담을 토큰 수 상한, <code>--tensor-parallel-size 2</code>는 GPU 두 장에 모델을 쪼갠다는 뜻입니다.
+      PagedAttention은 옵션이 없습니다 — 기본으로 켜져 있습니다.</p>
+      <p>각 값의 자세한 조정법은 책 6~7장에서 다룹니다.</p>
+    </div>
+  </details>
+
+  <div class="sum">
+    <span class="t">6장 세 줄 요약</span>
+    <ol>
+      <li><b>정의</b> — vLLM은 높은 throughput과 메모리 효율을 목표로 만든 <b>LLM 전용 inference·serving engine</b>입니다.</li>
+      <li><b>성질</b> — <b>PagedAttention</b>(메모리 조각 관리)과 <b>continuous batching</b>(빈 자리에 즉시 투입)이 핵심이고, 나머지는 설정값으로 조율합니다.</li>
+      <li><b>쓰임</b> — 하드웨어를 늘리기 전에 설정부터 봅니다. 설정 두 개로 15배가 나온 사례가 실제로 있습니다.</li>
+    </ol>
+  </div>
+</section>
+<p class="recap">— Part 2. 모델 서빙 방안 — 여기서부터는 "어디에, 어떻게 올릴 것인가" 네 가지 —</p>
+
+<section id="ch-ondevice">
+  <h2><span class="num">07</span>On-Device Serving — 서버 없이 기기에서</h2>
+  <p class="sub">한 줄 요약: <b>모델을 서버가 아니라 사용자의 폰·드론·카메라 안에서 직접 돌리는 방식입니다.</b></p>
+
+  <div class="why">
+    <span class="t">왜 이걸 배우나</span>
+    <div class="q">"비행기 모드인데 왜 얼굴 인식은 계속 되지?"</div>
+    <p>서버를 못 부르는데도 동작한다면, 모델이 <b>기기 안에</b> 있다는 뜻입니다.
+    지연시간이 0에 가깝고 데이터가 밖으로 나가지 않는 대신, 대가가 분명히 있습니다.</p>
+    <p style="margin-top:12px">이 장에서는 온디바이스가 <b>언제 정답이고 언제 함정인지</b>를 구분하는 기준을 얻습니다.</p>
+  </div>
+
+  <div class="terms">
+    <span class="t">이 장에 나오는 낯선 말</span>
+    <dl>
+      <dt>On-Device / Edge Serving</dt>
+      <dd>모델을 서버가 아니라 <em>사용자 기기(스마트폰·드론·카메라·로봇) 안에서 직접 실행</em>하는 방식.</dd>
+      <dt>Model Runtime</dt>
+      <dd>기기와 OS가 제각각이어도 모델이 돌아가게 <em>가운데서 맞춰주는 소프트웨어 층</em>. <b>LiteRT</b>, <b>ONNX Runtime(ORT)</b>, <b>Core ML</b> 등이 있습니다.</dd>
+      <dt>Delegate</dt>
+      <dd>계산의 일부를 <em>GPU나 NPU 같은 전용 하드웨어에 넘기는</em> 기능.</dd>
+      <dt>NPU (Neural Processing Unit)</dt>
+      <dd>AI 계산 전용 칩. 아이폰의 <em>Neural Engine</em>, 안드로이드의 <em>Snapdragon</em> 계열 등 기기마다 다릅니다.</dd>
+      <dt>Model Wrapper</dt>
+      <dd>개발자가 직접 만드는 층. <em>입력 전처리 → 모델 로딩 → 실행 → 출력 후처리</em>를 감싸서, 앱은 <em>한 줄로</em> 모델을 부르게 됩니다.</dd>
+      <dt>Convert (변환)</dt>
+      <dd>학습용 형식을 <em>기기용 형식으로 바꾸는 것</em>. 예: PyTorch ResNet → <code>.tflite</code></dd>
+    </dl>
+  </div>
+
+  <h3 style="margin-top:34px">비유 먼저 — 공구를 집에 둘 것인가</h3>
+  <p>드라이버가 필요할 때마다 공구 대여점에 다녀오면, 왕복 시간이 듭니다.
+  대신 집에 두면 <b>즉시</b> 쓸 수 있습니다. 그게 온디바이스입니다.</p>
+  <p>단점도 같습니다. 집이 좁으면 큰 공구는 못 둡니다(메모리 제약).
+  더 좋은 신제품이 나와도 <b>집집마다 배달해야</b> 바뀝니다(업데이트 문제).
+  그리고 집마다 콘센트 규격이 달라서 어떤 집에선 잘 안 돌아갑니다(하드웨어 파편화).</p>
+
+  <h3>온디바이스 앱은 두 층으로 되어 있다</h3>
+  <ol class="steps">
+    <li><b>Model Runtime — 아래층</b>
+      <span>기기와 OS 차이를 흡수합니다. GPU·NPU에 계산을 넘기는 delegate도 여기서 담당합니다. 우리가 만드는 게 아니라 <b>가져다 쓰는</b> 것입니다.</span></li>
+    <li><b>Model Wrapper — 윗층</b>
+      <span>우리가 직접 만듭니다. 앱 로직이 <code>predict(image)</code> 한 줄로 부를 수 있게, 전처리와 후처리를 안쪽에 숨깁니다.</span></li>
+  </ol>
+  <p>흐름은 이렇습니다. <b>앱 로직 → model wrapper 호출 → (데이터 변환) → model runtime 실행 → 기기 하드웨어에서 inference.</b></p>
+
+  <p>모델을 기기용으로 준비하는 과정은 네 단계입니다. Qualcomm AI Hub 같은 도구가 이 과정을 자동화해 줍니다.</p>
+  <ol class="steps">
+    <li><b>Convert</b><span>학습 형식 → 런타임 전용 형식으로 변환합니다.</span></li>
+    <li><b>정확도 검증</b><span>서버와 기기에서 <b>같은 입력</b>을 넣고 출력 차이를 비교합니다. 변환하면서 품질이 떨어지지 않았는지 확인하는 단계입니다.</span></li>
+    <li><b>성능 측정</b><span>실제 기기에서 요구 속도가 나오는지 잽니다.</span></li>
+    <li><b>패키징 · 배포</b><span>앱 설치·업데이트에 포함해서 내보냅니다.</span></li>
+  </ol>
+
+  <div class="demo">
+    <div class="demo-head"><span class="tag">그림 7</span><h4>On-Device vs Cloud — 어느 쪽이 빠른지는 상황이 정한다</h4>
+      <span class="hint">↔ 슬라이더 3개</span></div>
+    <div class="todo">해볼 것 — <b>①</b> 네트워크 왕복 시간을 올려보세요(지하철·시골). 클라우드 막대가 길어지고 온디바이스가 이깁니다.
+    <b>②</b> 모델 크기를 기기 메모리보다 크게 밀어보세요. 온디바이스 쪽에 <b>실행 불가</b>가 뜹니다 — 아무리 빨라도 안 들어가면 소용없습니다.
+    <b>③</b> 모델을 키우면서 배터리 막대를 보세요. 기기에서 큰 모델을 돌리는 건 <b>전력</b>으로 값을 치릅니다.</div>
+    <div class="stage">
+      <div class="canvas-wrap"><canvas id="cv-edge" height="300"></canvas></div>
+      <div class="side">
+        <div class="ctrl">
+          <label>모델 크기 (MB) <b id="lb-e-size">120</b></label>
+          <input type="range" id="sl-e-size" min="5" max="4000" step="5" value="120">
+          <label>기기 여유 메모리 (MB) <b id="lb-e-mem">1500</b></label>
+          <input type="range" id="sl-e-mem" min="100" max="6000" step="50" value="1500">
+          <label>네트워크 왕복 (ms) <b id="lb-e-net">60</b></label>
+          <input type="range" id="sl-e-net" min="5" max="1200" step="5" value="60">
+        </div>
+        <div class="bars" id="ro-edge-bars"></div>
+        <div class="readout" id="ro-edge"></div>
+      </div>
+    </div>
+  </div>
+
+  <h3>언제 쓰고, 무엇을 포기하나</h3>
+  <div class="tscroll"><table>
+    <tr><th style="width:150px">구분</th><th style="width:230px">온디바이스가 적합한 경우</th><th>온디바이스의 제약</th></tr>
+    <tr><td>프라이버시</td><td>생체 인증, 건강 데이터처럼 <b>원본이 기기 밖으로 나가면 안 되는</b> 경우</td><td rowspan="4">
+      <b>① 연산·저장 공간 제약</b> — 대형 모델은 아예 안 들어갑니다. (Gemma 3 270M처럼 온디바이스를 노리고 만든 경량 모델은 예외)<br><br>
+      <b>② 전력 소모</b> — 배터리를 빠르게 씁니다. 저해상도를 고해상도로 실시간 변환하는 작업 같은 건 전력 때문에 로컬에서 잘 안 합니다.<br><br>
+      <b>③ 업데이트가 어려움</b> — 모델을 고치면 <b>모든 기기에 앱 업데이트를 뿌려야</b> 합니다. 은행 앱 사기 탐지 모델을 자주 고쳐야 한다면 큰 부담입니다.<br><br>
+      <b>④ 하드웨어 파편화</b> — 기기마다 NPU 지원이 다릅니다. iPhone Neural Engine에 최적화한 모델이 Android Snapdragon에서는 비효율적일 수 있습니다.
+    </td></tr>
+    <tr><td>초저지연</td><td>제스처 인식, 로봇 제어, AR/VR, 실시간 오디오처럼 <b>밀리초</b>가 중요한 경우</td></tr>
+    <tr><td>불안정한 연결</td><td>산업 장비, 원격 센서, 차량, 드론</td></tr>
+    <tr><td>IoT · 로봇</td><td>특정 작업에 맞춘 <b>저전력 경량 모델</b>이면 충분한 경우</td></tr>
+  </table></div>
+
+  <div class="sum">
+    <span class="t">7장 세 줄 요약</span>
+    <ol>
+      <li><b>정의</b> — On-device serving은 모델을 사용자 기기 안에서 직접 실행하는 방식이고, <b>model runtime + model wrapper</b> 두 층으로 구성됩니다.</li>
+      <li><b>성질</b> — 지연시간과 프라이버시에서 강하고, <b>메모리·전력·업데이트·하드웨어 파편화</b>에서 약합니다.</li>
+      <li><b>쓰임</b> — 모델이 기기에 들어가고, 자주 안 고쳐도 되고, 네트워크를 못 믿을 때 고릅니다.</li>
+    </ol>
+  </div>
+</section>
+
+<p class="recap">— 여기까지: 기기 안에서 돌리기. 다음은 반대편 — 서버에 올리는 가장 기본적인 방식 —</p>
+
+<section id="ch-single">
+  <h2><span class="num">08</span>Single-model Service — 모델 하나에 서비스 하나</h2>
+  <p class="sub">한 줄 요약: <b>가장 단순하고 가장 성능이 좋습니다. 대신 모델이 많아지면 감당이 안 됩니다.</b></p>
+
+  <div class="why">
+    <span class="t">왜 이걸 배우나</span>
+    <div class="q">"컨테이너 하나에 모델 하나. 이렇게 단순한 게 정말 기본값이라고?"</div>
+    <p>맞습니다. 클라우드 모델 서빙에서 가장 널리 쓰이는 고전적인 패턴이고,
+    <b>특별한 이유가 없으면 이걸 고릅니다.</b> 이유는 성능과 격리입니다.</p>
+    <p style="margin-top:12px">이 장에서는 이 방식의 내부 구조, 요청을 어느 서버로 보낼지 정하는
+    <b>라우팅 전략</b>, 그리고 트래픽이 늘 때 <b>어느 방향으로 키우는지</b>를 알게 됩니다.</p>
+  </div>
+
+  <div class="terms">
+    <span class="t">이 장에 나오는 낯선 말</span>
+    <dl>
+      <dt>Single-model Service</dt>
+      <dd>모델 하나(또는 모델 버전 하나)를 <em>독립된 웹 서비스로 배포</em>하는 방식.</dd>
+      <dt>API Server · Model Management · Inference Backend</dt>
+      <dd>서빙 컨테이너 안의 <em>세 부품</em>. 각각 <em>외부에 노출 / 모델 파일 관리 / 실제 실행</em>을 맡습니다.</dd>
+      <dt>Round Robin</dt>
+      <dd>요청을 <em>순서대로 돌아가며</em> 서버에 나눠주는 가장 단순한 방식. c1 → c2 → c3 → c1 …</dd>
+      <dt>Least Connections</dt>
+      <dd><em>지금 처리 중인 요청이 가장 적은 서버</em>로 보내는 방식.</dd>
+      <dt>Least Response Time</dt>
+      <dd>최근에 <em>가장 빨리 답한 서버</em>로 보내는 방식.</dd>
+      <dt>Horizontal Scaling (Scale Out)</dt>
+      <dd>같은 컨테이너를 <em>여러 대로 늘리는</em> 것. 옆으로 키웁니다.</dd>
+      <dt>Vertical Scaling (Scale Up)</dt>
+      <dd>더 <em>큰 GPU를 쓰거나 여러 GPU에 모델을 쪼개는</em> 것. 위로 키웁니다.</dd>
+      <dt>HPA (Horizontal Pod Autoscaler)</dt>
+      <dd>Kubernetes에서 <em>지표를 보고 컨테이너 수를 자동 조절</em>하는 장치.</dd>
+      <dt>NVLink · InfiniBand(IB) · RoCEv2</dt>
+      <dd>각각 <em>같은 기계 안 GPU끼리</em>, <em>기계와 기계 사이</em>를 잇는 통신 방식. 속도 차이가 큽니다.</dd>
+      <dt>Bin Packing</dt>
+      <dd>남는 공간이 없게 <em>차곡차곡 채워 배치</em>하는 스케줄링 전략. 상자에 짐을 빈틈없이 담는 그림을 떠올리면 됩니다.</dd>
+    </dl>
+  </div>
+
+  <h3 style="margin-top:34px">비유 먼저 — 창구가 여러 개인 은행</h3>
+  <p>창구마다 <b>같은 업무를 하는 직원</b>이 앉아 있습니다. 손님이 오면 안내 직원이 어느 창구로 갈지 정해줍니다.
+  이 안내 직원이 <b>라우터</b>입니다.</p>
+  <p>가장 단순한 안내는 "1번, 2번, 3번, 다시 1번" 순서대로입니다(<b>round robin</b>).
+  손님 업무가 다 비슷하면 잘 굴러갑니다. 그런데 어떤 손님은 <b>대출 상담 40분</b>, 어떤 손님은 <b>입금 1분</b>이라면?
+  순서대로 보내는 순간 1번 창구만 지옥이 됩니다.</p>
+
+  <h3>작은 숫자로 한 번</h3>
+  <div class="calc">
+요청 6건이 c1 → c2 → c3 순서로 배정된다고 하면<br>
+&nbsp;&nbsp;요청 1: 5000토큰 (10초) → c1<br>
+&nbsp;&nbsp;요청 2: &nbsp;100토큰 (0.2초) → c2<br>
+&nbsp;&nbsp;요청 3: &nbsp;100토큰 (0.2초) → c3<br>
+&nbsp;&nbsp;요청 4: 5000토큰 (10초) → c1&nbsp;&nbsp;<span class="cm">// 또 c1!</span><br>
+&nbsp;&nbsp;요청 5: &nbsp;100토큰 → c2<br>
+&nbsp;&nbsp;요청 6: &nbsp;100토큰 → c3<br>
+<span class="cm">──────────────────</span><br>
+c1이 짊어진 시간 = <span class="hl">20초</span><br>
+c2 = 0.4초 &nbsp; c3 = 0.4초&nbsp;&nbsp;<span class="cm">// 두 대는 거의 놀고 있음</span>
+  </div>
+  <p>그래서 <b>가중 round robin</b>(성능 좋은 서버에 더 많이),
+  <b>least connections</b>(지금 한가한 서버로),
+  <b>least response time</b>(최근 빨랐던 서버로),
+  <b>동적 로드 밸런싱</b>(CPU·GPU·큐 길이 실시간 지표 기반) 같은 전략이 나옵니다.
+  LLM에 특화된 더 똑똑한 라우팅(예: 같은 프롬프트 앞부분을 캐시해둔 서버로 보내는
+  <b>cache-aware routing</b>)은 뒤 장에서 다룹니다.</p>
+
+  <div class="demo">
+    <div class="demo-head"><span class="tag">그림 8</span><h4>라우팅 전략 비교 — 순서대로 보내면 왜 망가지는가</h4>
+      <span class="hint">↔ 버튼 + 재생</span></div>
+    <div class="todo">해볼 것 — <b>①</b> <b>재생</b>을 누른 채 Round Robin과 Least Connections를 번갈아 눌러보세요. 컨테이너 큐 높이가 확 달라집니다.
+    <b>②</b> "요청 크기 편차" 슬라이더를 0으로 두면 세 전략이 거의 같아집니다. <b>편차가 없으면 round robin으로 충분합니다.</b>
+    <b>③</b> 편차를 최대로 밀면 Round Robin에서 한 컨테이너만 빨갛게 밀립니다. 평균 대기시간 숫자를 비교해 보세요.</div>
+    <div class="stage">
+      <div class="canvas-wrap"><canvas id="cv-route" height="400"></canvas></div>
+      <div class="side">
+        <div class="ctrl">
+          <label>요청 크기 편차 <b id="lb-r-var">0.85</b></label>
+          <input type="range" id="sl-r-var" min="0" max="1" step="0.01" value="0.85">
+          <label>초당 도착 요청 <b id="lb-r-rate">2.5</b></label>
+          <input type="range" id="sl-r-rate" min="1" max="6" step="0.5" value="2.5">
+          <div class="btnrow" style="margin-top:6px">
+            <button id="btn-r-rr" class="on">Round Robin</button>
+            <button id="btn-r-lc">Least Conn</button>
+          </div>
+          <div class="btnrow" style="margin-top:8px">
+            <button id="btn-r-play">▶ 재생</button>
+            <button id="btn-r-reset">초기화</button>
+          </div>
+        </div>
+        <div class="readout" id="ro-route"></div>
+        <div class="note ok" style="margin:0; font-size:13.5px">
+          <span class="t">관찰 포인트</span>
+          <p>LLM 요청은 길이 편차가 <b>매우 큽니다</b>. 그래서 round robin이 특히 잘 안 맞습니다.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h3>컨테이너 하나의 속은 세 부품</h3>
+  <div class="tscroll"><table>
+    <tr><th style="width:210px">부품</th><th>하는 일</th></tr>
+    <tr><td><b>API Server</b></td><td>HTTP/gRPC로 추론 기능을 <b>외부에 노출</b></td></tr>
+    <tr><td><b>Model Management</b></td><td>모델 <b>다운로드 → 로컬 저장 → 백엔드에 로딩</b>. 새 모델이 올라오면 감지해 자동 갱신</td></tr>
+    <tr><td><b>Inference Backend</b></td><td><b>실제 실행</b> 담당. TensorFlow Serving, TorchServe, vLLM, TensorRT-LLM 등을 씁니다</td></tr>
+  </table></div>
+
+  <h3>트래픽이 늘면 어느 방향으로 키우나</h3>
+  <ol class="steps">
+    <li><b>Horizontal — 옆으로</b>
+      <span>같은 컨테이너를 여러 대 추가합니다. Kubernetes HPA가 CPU·메모리·지연시간·요청 수를 보고 자동 조정합니다. <b>모델이 GPU 한 장에 들어갈 때</b>의 기본 선택입니다.</span></li>
+    <li><b>Vertical — 위로</b>
+      <span>모델이 너무 커서 GPU 한 장에 안 들어갈 때(Llama-2-70B 같은 경우), 더 큰 GPU를 쓰거나 여러 GPU에 쪼개 싣습니다. vLLM에서는 <code>--tensor-parallel-size 4</code> 한 줄이면 됩니다.</span></li>
+  </ol>
+
+  <div class="note warn">
+    <span class="t">중요한 원칙 — 쪼갤 거면 한 기계 안에서</span>
+    <p>여러 기계에 걸쳐 나누는 것(inter-node)보다 <b>한 기계 안의 여러 GPU(intra-node)</b>가 낫습니다.
+    기계를 넘어가면 네트워크 지연과 동기화 복잡도가 붙기 때문입니다.</p>
+    <p style="margin-top:10px">숫자로 보면 확실합니다. 같은 기계 안의 <b>NVLink는 900GB/s</b>,
+    기계 사이의 <b>IB/RoCEv2는 400Gbps = 50GB/s</b>. <b>약 18배 차이</b>입니다.
+    모델을 쪼개면 GPU끼리 계속 중간 결과를 주고받아야 하는데, 그 통로가 18배 좁아지는 셈입니다.</p>
+  </div>
+
+  <div class="note">
+    <span class="t">보충 — Kubernetes bin packing</span>
+    <p>기본 스케줄러는 파드를 <b>골고루 분산</b>합니다. GPU 노드가 5개이고 1 GPU짜리 파드가 5개면,
+    노드마다 하나씩 흩어 놓습니다. 그러면 각 노드에 <b>애매하게 남은 GPU 조각</b>이 생깁니다(파편화).</p>
+    <p style="margin-top:10px"><b>Bin packing</b>은 반대로 한 노드를 빈틈없이 채우고 다음 노드로 넘어갑니다.
+    그러면 완전히 비어 있는 노드가 생겨서, 큰 워크로드를 넣거나 노드를 꺼서 비용을 줄일 수 있습니다.</p>
+  </div>
+
+  <h3>왜 이게 기본 선택지인가, 그리고 한계</h3>
+  <div class="tscroll"><table>
+    <tr><th style="width:150px">구분</th><th>내용</th></tr>
+    <tr><td><b>장점</b></td><td>자원 경쟁이 없어 <b>최고 성능·최저 지연시간</b> · 모델별 독립 확장 · 로그와 지표가 격리돼 디버깅이 쉬움 · 한 모델이 죽어도 다른 모델 무사 · 모델별 하드웨어 최적화로 비용 통제 용이</td></tr>
+    <tr><td><b>한계</b></td><td>자원 효율이 나쁩니다. 고객 100명이 각자 모델 10개를 쓰는 에이전트 플랫폼이면 <b>1,000개의 독립 서비스</b>가 됩니다. 유지보수·패치·모니터링 부담이 압도적이고, <b>거의 안 쓰이는 모델도 GPU를 붙잡고 있습니다.</b></td></tr>
+  </table></div>
+  <p>이 한계를 풀기 위해 나온 것이 다음 장의 <b>Multi-Model Service</b>입니다.</p>
+
+  <div class="sum">
+    <span class="t">8장 세 줄 요약</span>
+    <ol>
+      <li><b>정의</b> — 모델(또는 모델 버전) 하나를 <b>독립된 웹 서비스</b>로 배포하고, 컨테이너 안은 <b>API Server + Model Management + Inference Backend</b>로 구성됩니다.</li>
+      <li><b>성질</b> — 성능과 격리가 최고입니다. 라우팅은 요청 길이 편차 때문에 round robin만으로는 부족하고, 확장은 <b>horizontal이 기본, vertical은 모델이 클 때</b>입니다.</li>
+      <li><b>쓰임</b> — 트래픽이 꾸준하고 저지연이 필요한 모델의 기본 선택. 모델 개수가 폭증하면 비용이 무너집니다.</li>
+    </ol>
+  </div>
+</section>
+
+<p class="recap">— 여기까지: 모델 하나에 서비스 하나. 다음은 모델 1,000개를 어떻게 감당하는가 —</p>
+
+<section id="ch-multi">
+  <h2><span class="num">09</span>Multi-Model Service — 컨테이너 하나에 여러 모델</h2>
+  <p class="sub">한 줄 요약: <b>모든 모델을 항상 올려두지 않고, 요청이 올 때만 올렸다 내립니다.</b></p>
+
+  <div class="why">
+    <span class="t">왜 이걸 배우나</span>
+    <div class="q">"모델 1,000개를 각각 GPU에 올려두면 한 달에 얼마가 나올까?"</div>
+    <p>8장 마지막의 그 문제입니다. 그런데 실제로는 1,000개 중 <b>지금 이 순간 쓰이는 건 몇십 개</b>뿐입니다.
+    나머지는 GPU를 붙잡은 채 놀고 있습니다.</p>
+    <p style="margin-top:12px">이 장에서는 그 낭비를 없애는 방법과, 그 대가로 생기는
+    <b>두 가지 새로운 골칫거리</b>를 알게 됩니다.</p>
+  </div>
+
+  <div class="terms">
+    <span class="t">이 장에 나오는 낯선 말</span>
+    <dl>
+      <dt>Multi-Model Service</dt>
+      <dd>서빙 컨테이너 <em>하나가 여러 모델을 함께 호스팅</em>하고 GPU·CPU·메모리를 나눠 쓰는 방식.</dd>
+      <dt>Load / Unload</dt>
+      <dd>모델을 메모리에 <em>올리기 / 내리기</em>.</dd>
+      <dt>LRU (Least Recently Used)</dt>
+      <dd>자리가 부족하면 <em>가장 오랫동안 안 쓰인 것부터 내보내는</em> 규칙.</dd>
+      <dt>Cold start (콜드 스타트)</dt>
+      <dd>메모리에 없는 모델이 요청받아서 <em>다운로드·로딩을 기다리는 시간</em>. 몇 초에서 몇십 초까지 갑니다.</dd>
+      <dt>Model swapping</dt>
+      <dd>자리를 만들려고 <em>기존 모델을 내리고 새 모델을 올리는 것</em>. 잦으면 그것만 하다 끝납니다.</dd>
+      <dt>Route map</dt>
+      <dd><em>"어느 모델이 어느 컨테이너에 올라가 있는지"를 적어둔 표</em>.</dd>
+      <dt>Replica (복제본)</dt>
+      <dd>한 모델을 <em>몇 개 컨테이너에 올려둘지</em>. 인기 모델은 이 수를 늘립니다.</dd>
+      <dt>AI Gateway</dt>
+      <dd>모델 라우팅·인증·한도 관리를 맡는 <em>앞단 관문</em> 제품군. <b>Envoy AI Gateway</b>, <b>LiteLLM</b> 등이 있습니다.</dd>
+      <dt>Triton Inference Server</dt>
+      <dd>NVIDIA의 대표적인 <em>멀티 모델 추론 백엔드</em>. TensorFlow·ONNX·PyTorch 모델을 한 곳에서 다룹니다.</dd>
+    </dl>
+  </div>
+
+  <h3 style="margin-top:34px">비유 먼저 — 책상과 책장</h3>
+  <p>책상 위에는 책 세 권만 올라갑니다. 책장에는 1,000권이 있습니다.</p>
+  <p>지금 읽을 책을 책상에 올려놓고 읽습니다(<b>load</b>). 네 번째 책이 필요하면?
+  <b>가장 오랫동안 안 펼친 책</b>을 책장에 도로 꽂고 자리를 만듭니다(<b>LRU unload</b>).
+  책장에서 꺼내오는 그 시간이 <b>cold start</b>입니다.</p>
+  <p>대부분의 시간에는 잘 굴러갑니다. 문제는 <b>세 권을 번갈아 가며 읽어야 할 때</b>입니다.
+  꽂았다 뺐다만 반복하고 정작 읽는 시간이 없습니다. 이게 <b>model swapping 지옥</b>입니다.</p>
+
+  <div class="demo">
+    <div class="demo-head"><span class="tag">그림 9</span><h4>모델 캐시 — 직접 요청을 보내 LRU가 도는 걸 보기</h4>
+      <span class="hint">↔ 모델 버튼 클릭</span></div>
+    <div class="todo">해볼 것 — <b>①</b> 모델 버튼(A~F)을 눌러 요청을 보내세요. 이미 올라가 있으면 <b>hit(초록)</b>, 없으면 <b>miss(주황) + cold start</b>가 붙습니다.
+    <b>②</b> A → B → C만 반복해 보세요. 슬롯이 3개면 계속 hit입니다. 여기에 D를 섞는 순간 무너집니다.
+    <b>③</b> 슬롯 수를 1로 줄이고 아무 버튼이나 마구 눌러보세요. <b>거의 전부 miss</b>가 됩니다 — 이게 model swapping 지옥입니다.</div>
+    <div class="stage">
+      <div class="canvas-wrap"><canvas id="cv-cache" height="345"></canvas></div>
+      <div class="side">
+        <div class="ctrl">
+          <label>컨테이너 슬롯 수 <b id="lb-c-slot">3</b></label>
+          <input type="range" id="sl-c-slot" min="1" max="5" step="1" value="3">
+          <div class="btnrow" style="margin-top:6px">
+            <button id="btn-c-A">Model A</button>
+            <button id="btn-c-B">Model B</button>
+            <button id="btn-c-C">Model C</button>
+          </div>
+          <div class="btnrow" style="margin-top:8px">
+            <button id="btn-c-D">Model D</button>
+            <button id="btn-c-E">Model E</button>
+            <button id="btn-c-F">Model F</button>
+          </div>
+          <div class="btnrow" style="margin-top:8px">
+            <button id="btn-c-reset">초기화</button>
+          </div>
+        </div>
+        <div class="readout" id="ro-cache"></div>
+        <div class="note ok" style="margin:0; font-size:13.5px">
+          <span class="t">관찰 포인트</span>
+          <p>hit rate가 곧 사용자 체감 속도입니다. 슬롯을 늘리면 올라가지만, 그만큼 GPU 값을 더 냅니다.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h3>컨테이너 안은 두 부품</h3>
+  <ol class="steps">
+    <li><b>Model Server Inference Backend</b>
+      <span>모델마다 프레임워크가 달라도(TensorFlow · ONNX · PyTorch) <b>하나의 예측 API</b>로 감싸주는 블랙박스. 안쪽에 프레임워크별 백엔드를 여러 개 갖고 있습니다. 대표 오픈소스가 <b>NVIDIA Triton Inference Server</b>입니다.</span></li>
+    <li><b>Model Cache Management</b>
+      <span>저장소에서 모델을 받아 백엔드에 올리고, 자원 사용량이 임계치(예: 80%)를 넘으면 <b>LRU로 가장 안 쓰인 모델을 내려</b> 자리를 만듭니다.</span></li>
+  </ol>
+  <p>요청이 오면 이렇게 처리합니다. <b>①</b> 이미 로드돼 있으면 바로 실행.
+  <b>②</b> 없으면 저장소에서 받아 로드한 뒤 실행. <b>③</b> 메모리·디스크가 임계치를 넘으면 가장 덜 쓰인 모델을 언로드.</p>
+
+  <h3>대가로 생기는 두 가지 문제</h3>
+  <ol class="steps">
+    <li><b>라우팅이 어려워집니다</b>
+      <span>모델이 어느 컨테이너에 있을지 모릅니다. <b>이미 그 모델이 올라간 컨테이너</b>로 보내야 하는데, 잘못 보내면 cold start나 model swapping이 붙습니다.</span></li>
+    <li><b>모델별 스케일링이 어려워집니다</b>
+      <span>모델마다 트래픽이 다릅니다. 인기 있는(hot) 모델은 더 많은 인스턴스가 필요한데, 컨테이너 단위로만 늘리면 조절이 안 됩니다.</span></li>
+  </ol>
+
+  <div class="note ok">
+    <span class="t">해법 — 라우팅 계층에 두 가지를 얹는다</span>
+    <p><b>① replica 속성</b> — 각 모델을 몇 개 컨테이너에 올려둘지 정의합니다.<br>
+    <b>② route map</b> — 어느 모델이 어느 컨테이너에 있는지 추적합니다.</p>
+    <p style="margin-top:10px">모델 A의 replica가 2라면, 라우터가 A를 C1과 C3에 배치하고 이후 A 요청을 둘에 나눠 보냅니다.
+    트래픽이 변하면 replica 수를 실시간으로 조정하고, 새 replica를 <b>어느 컨테이너에 넣을지</b>도 라우터가 정합니다
+    — 8장에서 본 그 <b>bin packing</b> 문제입니다.</p>
+    <p style="margin-top:10px">요즘은 이 역할을 <b>AI Gateway</b> 제품군이 맡습니다. <b>Envoy AI Gateway</b>, <b>LiteLLM</b> 같은 것들입니다.</p>
+  </div>
+
+  <div class="note warn">
+    <span class="t">멀티 모델이 안 맞는 상황</span>
+    <p>· 모델이 너무 커서 GPU 하나에 <b>여러 개를 얹을 여지가 아예 없는</b> 경우<br>
+    · 언로드가 잦아 <b>cold start 오버헤드가 이득을 잡아먹는</b> 경우<br>
+    · 개별 모델 트래픽이 많고 저지연이 필요해 <b>항상 올라가 있어야 하는</b> 경우 → 8장의 single-model이 낫습니다<br>
+    · 모델마다 <b>보안 정책이 다른</b> 경우<br>
+    · 캐시 관리, 모델별 라우팅·스케일링, 프레임워크 호환성, 의존성 충돌로 <b>운영 복잡도가 감당이 안 되는</b> 경우</p>
+  </div>
+
+  <p>정리하면 <b>single-model과 multi-model은 경쟁 관계가 아니라 상호 보완</b>입니다.
+  실무에서는 둘을 섞어 씁니다. 그리고 그 "섞어 쓰는 틀"이 다음 장의 <b>Model Serving Platform</b>입니다.</p>
+
+  <div class="sum">
+    <span class="t">9장 세 줄 요약</span>
+    <ol>
+      <li><b>정의</b> — 컨테이너 하나가 여러 모델을 함께 호스팅하고, 요청이 올 때 <b>동적으로 load/unload</b>합니다.</li>
+      <li><b>성질</b> — <b>LRU 캐시</b>로 자리를 관리하며 비용을 크게 아끼는 대신, <b>라우팅</b>과 <b>모델별 스케일링</b>이라는 두 문제가 생깁니다. 해법은 route map + replica 수를 아는 라우터입니다.</li>
+      <li><b>쓰임</b> — 모델 수가 많고 개별 트래픽이 낮거나 불규칙할 때. 항상 뜨거운 모델은 single-model로 빼둡니다.</li>
+    </ol>
+  </div>
+</section>
+<p class="recap">— 여기까지: 두 가지 서빙 방식. 다음은 그 둘을 한 지붕 아래 묶는 큰 그림 —</p>
+
+<section id="ch-platform">
+  <h2><span class="num">10</span>Model Serving Platform — 여러 모델이 협업할 때</h2>
+  <p class="sub">한 줄 요약: <b>요청 하나가 모델 다섯 개를 순서대로 거쳐야 한다면, 그걸 관리하는 층이 따로 필요합니다.</b></p>
+
+  <div class="why">
+    <span class="t">왜 이걸 배우나</span>
+    <div class="q">"챗봇 답변 하나 만드는 데 왜 모델이 다섯 개나 필요하지?"</div>
+    <p>실제 서비스는 모델 하나로 안 끝납니다. 음성 비서는
+    <b>음성 인식 → 자연어 이해 → 추천 → 음성 합성</b>을 한 번의 명령에 다 돌립니다.</p>
+    <p style="margin-top:12px">이 장에서는 여러 모델을 <b>순서대로 또는 동시에</b> 엮는 구조와,
+    앱마다 자원을 갈라 쓰는 방법을 알게 됩니다. 여기까지 오면 CH1의 그림이 완성됩니다.</p>
+  </div>
+
+  <div class="terms">
+    <span class="t">이 장에 나오는 낯선 말</span>
+    <dl>
+      <dt>Gateway</dt>
+      <dd>외부 요청이 <em>맨 처음 들어오는 문</em>. 인증·한도 확인이 여기서 이뤄집니다.</dd>
+      <dt>Graph Execution (그래프 실행)</dt>
+      <dd>여러 모델 호출을 <em>정해진 순서와 갈래대로 실행</em>하는 것. 순서도를 그대로 돌린다고 보면 됩니다.</dd>
+      <dt>Workflow (워크플로우)</dt>
+      <dd><em>"이 요청은 이 순서로 처리한다"고 미리 정의해 둔 절차</em>. Airflow, Ray 같은 도구로 만듭니다.</dd>
+      <dt>Resource Group (리소스 그룹)</dt>
+      <dd>앱·비즈니스별로 <em>CPU·GPU·메모리 몫을 갈라 놓은 칸</em>. 한 앱이 다 써버리는 걸 막습니다.</dd>
+      <dt>Quota (쿼터)</dt>
+      <dd>그 칸에 <em>배정된 한도</em>.</dd>
+      <dt>KServe</dt>
+      <dd>Kubernetes 네이티브 서빙 플랫폼(구 KFServing). <em>autoscaling(scale-to-zero 포함)과 멀티 프레임워크</em>를 지원합니다.</dd>
+      <dt>Scale-to-zero</dt>
+      <dd>요청이 없으면 <em>인스턴스를 0개까지 줄이는</em> 기능. 안 쓰는 동안 돈이 안 나갑니다. 대신 첫 요청에 cold start가 붙습니다.</dd>
+      <dt>Ray Serve</dt>
+      <dd>Ray 기반 서빙. <em>다단계 추론 그래프를 짜는 데 강합니다.</em></dd>
+      <dt>MLflow</dt>
+      <dd>모델 레지스트리·실험 추적과 <em>서빙을 함께 관리</em>하는 도구.</dd>
+    </dl>
+  </div>
+
+  <h3 style="margin-top:34px">비유 먼저 — 공항</h3>
+  <p>비행기 한 대가 뜨려면 <b>체크인 → 보안 → 게이트 → 활주로 배정 → 관제</b>가 순서대로 돌아가야 합니다.
+  각 단계는 독립된 조직이지만, 누군가는 <b>전체 순서를 관리</b>해야 합니다.
+  그 역할이 <b>graph execution</b>입니다.</p>
+  <p>그리고 공항에는 항공사마다 배정된 게이트 수가 있습니다.
+  한 항공사가 게이트를 다 쓰면 다른 항공사가 마비되니까요.
+  이 배분이 <b>resource group</b>입니다.</p>
+
+  <h3>플랫폼을 이루는 네 부품</h3>
+  <ol class="steps">
+    <li><b>Gateway</b>
+      <span>외부 요청의 진입점. 접근 제어와 보안이 붙습니다.</span></li>
+    <li><b>Routing</b>
+      <span>어떤 모델과 어떤 serving group으로 보낼지 고릅니다. 8·9장에서 본 그 라우터입니다.</span></li>
+    <li><b>Graph Execution</b>
+      <span>한 요청이 여러 모델을 <b>순차 또는 병렬</b>로 쓰게 해줍니다. 각 앱 팀이 자기 워크플로우를 정의해 올려두면, 요청이 올 때 엔진이 그대로 실행하며 단계마다 라우팅을 부릅니다.</span></li>
+    <li><b>Resource Groups</b>
+      <span>앱·시나리오별로 워크로드를 분리합니다. 예를 들어 App1 그룹 안에 single-model 서비스 2개와 multi-model 서비스 1개가 같이 삽니다. 그룹마다 자체 CPU/GPU/메모리 쿼터를 받습니다.</span></li>
+  </ol>
+
+  <p>전체 흐름은 이렇습니다.
+  <b>요청 → Gateway → Graph Execution(다단계 실행) → 단계마다 Routing 호출 → 해당 Resource Group의 single/multi 모델 서비스</b>.
+  실제 제품에는 여기에 접근 제어·보안·metric/monitoring·배포 파이프라인 통합이 더 붙습니다.</p>
+
+  <div class="demo">
+    <div class="demo-head"><span class="tag">그림 10</span><h4>Graph Execution — 다섯 모델을 순서대로 vs 겹쳐서</h4>
+      <span class="hint">↔ 재생 + 토글 + 슬라이더</span></div>
+    <div class="todo">해볼 것 — <b>①</b> <b>재생</b>을 눌러 요청이 Intent Classification → Embedding → Retrieval → LLM → Safety Filter를 지나가는 걸 보세요.
+    <b>②</b> <b>병렬 실행</b>을 켜면 Embedding과 Retrieval이 겹쳐 돌아 총 시간이 줄어듭니다. 어떤 단계는 겹칠 수 있고 어떤 단계는 못 겹칩니다.
+    <b>③</b> LLM 단계 슬라이더를 최대로 밀어보세요. <b>한 단계가 전체를 지배</b>합니다 — 최적화할 곳을 여기서 고릅니다.</div>
+    <div class="stage">
+      <div class="canvas-wrap"><canvas id="cv-graph" height="345"></canvas></div>
+      <div class="side">
+        <div class="ctrl">
+          <label>LLM 단계 (ms) <b id="lb-g-llm">900</b></label>
+          <input type="range" id="sl-g-llm" min="100" max="4000" step="50" value="900">
+          <label>Retrieval 단계 (ms) <b id="lb-g-ret">220</b></label>
+          <input type="range" id="sl-g-ret" min="20" max="1500" step="10" value="220">
+          <div class="btnrow" style="margin-top:6px">
+            <button id="btn-g-par">병렬 실행</button>
+            <button id="btn-g-play">▶ 재생</button>
+          </div>
+        </div>
+        <div class="readout" id="ro-graph"></div>
+        <div class="note ok" style="margin:0; font-size:13.5px">
+          <span class="t">관찰 포인트</span>
+          <p>총 지연시간의 대부분을 한 단계가 차지한다면, 나머지를 아무리 다듬어도 체감이 거의 안 바뀝니다.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h3>실제로 쓰는 플랫폼들</h3>
+  <div class="tscroll"><table>
+    <tr><th style="width:150px">이름</th><th>강점</th></tr>
+    <tr><td><b>KServe</b><br><span class="muted">구 KFServing</span></td><td>Kubernetes 네이티브. <b>autoscaling(scale-to-zero 포함)</b>과 멀티 프레임워크 지원</td></tr>
+    <tr><td><b>Ray Serve</b></td><td>Ray 기반. <b>다단계 추론 그래프(graph execution)</b> 구성에 강점</td></tr>
+    <tr><td><b>MLflow</b></td><td>모델 레지스트리와 연동된 서빙. <b>실험 추적까지 통합</b> 관리</td></tr>
+  </table></div>
+
+  <div class="sum">
+    <span class="t">10장 세 줄 요약</span>
+    <ol>
+      <li><b>정의</b> — Model serving platform은 <b>Gateway + Routing + Graph Execution + Resource Groups</b>로, 여러 앱·모델·워크플로우를 한 지붕 아래 묶습니다.</li>
+      <li><b>성질</b> — <b>graph execution</b>이 여러 모델을 순차·병렬로 엮고, <b>resource group</b>이 앱마다 자원 몫을 갈라 경합을 막습니다.</li>
+      <li><b>쓰임</b> — 대규모 조직이나 여러 모델이 협업하는 복잡한 AI 서비스에서 고릅니다. KServe · Ray Serve · MLflow가 대표적입니다.</li>
+    </ol>
+  </div>
+</section>
+
+<p class="recap">— 여기까지: 서빙 방안 네 가지를 다 봤습니다. 마지막으로 전체를 한 장에 —</p>
+
+<section id="ch-wrap">
+  <h2><span class="num">11</span>전체 정리 — 그래서 무엇을 고를까</h2>
+  <p class="sub">한 줄 요약: <b>네 방식은 우열이 아니라 조건입니다. 조건이 바뀌면 답도 바뀝니다.</b></p>
+
+  <div class="why">
+    <span class="t">왜 이걸 배우나</span>
+    <div class="q">"내 상황에서는 결국 어느 방식을 골라야 하는가?"</div>
+    <p>1장부터 10장까지 부품을 하나씩 봤습니다. 이제 그 부품들이
+    <b>어떤 조건에서 어떻게 조합되는지</b>를 한 화면에서 확인할 차례입니다.</p>
+    <p style="margin-top:12px">이 장을 마치면, 새 프로젝트를 받았을 때
+    <b>어떤 질문부터 던져야 하는지</b>를 알게 됩니다.</p>
+  </div>
+
+  <div class="terms">
+    <span class="t">이 장에 나오는 낯선 말</span>
+    <dl>
+      <dt>Radix Attention</dt>
+      <dd>여러 요청이 <em>공통으로 쓰는 프롬프트 앞부분을 나눠 쓰게</em> 하는 기법. <b>SGLang</b>이라는 엔진에서 씁니다. 발상은 6장의 PagedAttention과 같은 계열입니다 — <em>같은 걸 두 번 계산하지 말자.</em></dd>
+      <dt>SGLang</dt>
+      <dd>vLLM과 함께 자주 비교되는 <em>또 다른 LLM serving engine</em>.</dd>
+      <dt>On-premises (온프레미스)</dt>
+      <dd>클라우드가 아니라 <em>회사가 직접 소유한 서버실</em>에서 돌리는 것.</dd>
+    </dl>
+  </div>
+
+  <h3 style="margin-top:34px">네 가지 방식 한눈에</h3>
+  <div class="tscroll"><table>
+    <tr><th style="width:150px">방식</th><th style="width:250px">핵심 특징</th><th>적합한 상황</th></tr>
+    <tr><td><b>On-device</b></td><td>단말 안에서 직접 실행</td><td>초저지연, 오프라인, 개인정보 보호가 최우선일 때</td></tr>
+    <tr><td><b>Single-model</b></td><td>컨테이너 하나에 모델 하나</td><td>높은 성능과 독립적 확장이 필요할 때 — <b>기본 선택지</b></td></tr>
+    <tr><td><b>Multi-model</b></td><td>컨테이너 하나에 여러 모델</td><td>모델 수가 많고 트래픽이 낮거나 불규칙할 때</td></tr>
+    <tr><td><b>Serving platform</b></td><td>여러 앱·모델·워크플로 통합</td><td>대규모 조직, 여러 모델이 협업하는 복잡한 AI 서비스</td></tr>
+  </table></div>
+
+  <div class="demo">
+    <div class="demo-head"><span class="tag">그림 11</span><h4>서빙 방식 고르기 — 조건을 바꾸면 답이 바뀐다</h4>
+      <span class="hint">↔ 슬라이더 4개</span></div>
+    <div class="todo">해볼 것 — <b>①</b> 네 슬라이더를 움직이며 어떤 방식의 막대가 올라가는지 보세요. 1등이 바뀌는 지점을 찾는 게 목적입니다.
+    <b>②</b> 프라이버시 요구를 최대로 밀면 <b>모델 크기가 작을 때만</b> On-device가 1등이 됩니다. 요구만으로는 안 되고 크기가 받쳐줘야 합니다.
+    <b>③</b> 모델 개수를 최대로, 모델당 트래픽을 최소로 밀어보세요. Multi-model이 압도합니다 — 9장의 그 상황입니다.</div>
+    <div class="stage">
+      <div class="canvas-wrap"><canvas id="cv-choose" height="350"></canvas></div>
+      <div class="side">
+        <div class="ctrl">
+          <label>모델 크기 (B 파라미터) <b id="lb-ch-size">7</b></label>
+          <input type="range" id="sl-ch-size" min="0.3" max="70" step="0.1" value="7">
+          <label>모델 개수 <b id="lb-ch-count">3</b></label>
+          <input type="range" id="sl-ch-count" min="1" max="500" step="1" value="3">
+          <label>모델당 초당 요청 <b id="lb-ch-rps">15</b></label>
+          <input type="range" id="sl-ch-rps" min="0" max="100" step="1" value="15">
+          <label>프라이버시 · 오프라인 요구 <b id="lb-ch-priv">20</b></label>
+          <input type="range" id="sl-ch-priv" min="0" max="100" step="1" value="20">
+        </div>
+        <div class="bars" id="ro-choose-bars"></div>
+        <div class="readout" id="ro-choose"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="note warn">
+    <span class="t">그림 11에 대한 정직한 경고</span>
+    <p>이 추천기는 <b>이 글에서 설명한 규칙들을 제가 임의의 점수로 옮겨 놓은 것</b>입니다.
+    업계 표준 공식이 아니고, 실제 벤치마크에서 뽑은 수치도 아닙니다.
+    <b>조건이 바뀌면 답이 바뀐다는 감각</b>을 얻는 용도로만 쓰세요.
+    실제 결정은 반드시 본인 워크로드로 측정해야 합니다.</p>
+  </div>
+
+  <h3>CH1이 전달하려던 것</h3>
+  <p>이 장에서는 모델을 <b>엔지니어링 관점</b>에서 다뤘습니다.
+  모델은 정적인 데이터 파일이 아니라 <b>실행 가능한 구성요소</b>이고,
+  <b>model data · model architecture · model execution code</b> 세 가지로 이루어집니다.</p>
+
+  <p><b>모델 서빙</b>은 실제 운영 환경에서 모델을 배포해 실시간 데이터를 처리하고 예측을 생성하는 과정입니다.
+  배포 위치로는 <b>on-device · on-premises · cloud</b> 세 가지가 있고,
+  어디에 두든 <b>확장성 · 지연시간 · 모니터링 · 보안 · 비용</b>을 챙겨야 합니다.</p>
+
+  <p>그리고 클라우드 벤더 솔루션이나 LLM API를 쓰더라도 서빙 이해는 여전히 필요합니다.
+  클라우드는 편하지만 <b>복잡한 통합 · 비용 트레이드오프 · 보안 문제</b>는 여전히 우리 몫이고,
+  LLM은 강력하지만 실무에 넣으려면 <b>다중 모델 파이프라인 · 파인튜닝 · 비용 효율적 배포 전략</b>이 필요합니다.</p>
+
+  <div class="note ok">
+    <span class="t">숫자로 다시 한 번</span>
+    <p><b>KV Cache + PagedAttention(vLLM)</b>, <b>Radix Attention(SGLang)</b> 같은 기법을 쓰면
+    추가 인프라 비용 없이 <b>처리량을 6배 높이고 지연시간을 1/3로</b> 줄일 수 있습니다.
+    LLM 추론은 연산 비용이 크기 때문에, 서빙 최적화는 선택이 아니라
+    <b>비용 효율적인 AI 배포를 위한 필수 요소</b>입니다.</p>
+  </div>
+
+  <div class="sum">
+    <span class="t">11장 세 줄 요약</span>
+    <ol>
+      <li><b>정의</b> — 서빙 방식은 <b>On-device · Single-model · Multi-model · Serving platform</b> 네 가지이고, 각각 지연시간·비용·확장성·복잡도에서 다른 장단점을 가집니다.</li>
+      <li><b>성질</b> — 네 방식은 배타적이지 않습니다. 실무에서는 <b>섞어서</b> 씁니다. 뜨거운 모델은 single-model, 롱테일은 multi-model, 전체는 platform 위에.</li>
+      <li><b>쓰임</b> — 새 프로젝트에서 던질 첫 질문은 <b>"모델이 몇 개이고, 각각 얼마나 뜨겁고, 얼마나 크고, 데이터가 나가도 되는가"</b>입니다.</li>
+    </ol>
+  </div>
+</section>
+
+<section class="essay" id="ch-outro">
+  <h2>마치며</h2>
+
+  <p>이번 챕터에서는, 모델 서빙의 정의와 성질, 그리고 실제 적용 방법에 대해 다뤘습니다. 단순히 모델을 배포하는 것뿐만 아니라, 다양한 서빙 방식과 그에 따른 장단점을 이해하고, 실제 상황에 맞는 최적의 선택을 할 수 있는 능력을 기르는 것이 중요합니다.</p>
+
+  <p>또한, 모델 서빙은 단순한 기술적 문제를 넘어, 비용 효율성과 사용자 경험을 동시에 고려해야 하는 복합적인 과제임을 알 수 있었습니다. 또한 모델의 구조를 이해하고, 배포전략을 잘 구성해야 인프라 비용을 절감하고, 서빙하는 모델의 성능을 극대화 할 수 있다는 점을 배웠습니다.</p>
+
+  <div class="note">
+    <span class="t">틀린 곳이 있다면</span>
+    <p>댓글을 달아주세요. 제가 확인 후 수정하겠습니다. CH1은 <b>CloudNet@ 『CH1. Introduction to Model Serving and Optimization』 스터디 자료</b>를 바탕으로 재구성했습니다.</p>
+  </div>
+</section>
+
+<footer>
+  <p>CH1. Introduction to Model Serving and Optimization · 라이브러리 없이 동작합니다</p>
+</footer>
+</main>
+
+<script>
+"use strict";
+/* ══════════════════════════════════════════════
+   그림 엔진 — 건드릴 필요 없습니다
+   ══════════════════════════════════════════════ */
+const C = { a:'#2563eb', b:'#b8690b', c:'#15803d', d:'#c2185b', e:'#6d28d9',
+            grid:'#e9eef6', gridS:'#f2f5fa', axis:'#aab5c6', mut:'#5a6675', tx:'#1b2432' };
+const REDRAW = [];
+const F = (n,d=2)=> (Math.abs(n)<1e-9?0:n).toFixed(d);
+const DEG = r => r*180/Math.PI, RAD = d => d*Math.PI/180;
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+
+function mkPlot(id, opts){
+  const cv = document.getElementById(id);
+  if(!cv) return null;
+  const ctx = cv.getContext('2d');
+  const o = Object.assign({range:5, ox:0.5, oy:0.5}, opts||{});
+  /* 최초 1회만 읽는다 — fit()이 cv.height 를 덮어쓰므로 재측정하면 크기가 누적된다 */
+  const H0 = Number(cv.getAttribute('height')) || 380;
+  const P = { cv, ctx, o, w:0, h:0, s:40, cx:0, cy:0 };
+  P.fit = function(){
+    const dpr = window.devicePixelRatio || 1;
+    const w = Math.max(240, cv.clientWidth || 600);
+    const h = H0;
+    cv.width = Math.round(w*dpr); cv.height = Math.round(h*dpr);
+    cv.style.height = h+'px';
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    P.w = w; P.h = h; P.cx = w*o.ox; P.cy = h*o.oy;
+    P.s = (h*0.94)/(2*o.range);
+  };
+  P.X = x => P.cx + x*P.s;
+  P.Y = y => P.cy - y*P.s;
+  P.inv = (px,py) => ({ x:(px-P.cx)/P.s, y:(P.cy-py)/P.s });
+  P.evt = e => { const r = cv.getBoundingClientRect();
+    return P.inv((e.clientX-r.left)*(cv.clientWidth/r.width), (e.clientY-r.top)*(cv.clientHeight/r.height)); };
+  P.clear = ()=>{ ctx.clearRect(0,0,P.w,P.h); };
+  P.grid = function(step, labels){
+    step = step||1;
+    const x0 = -P.cx/P.s, x1 = (P.w-P.cx)/P.s, y0 = -(P.h-P.cy)/P.s, y1 = P.cy/P.s;
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = C.grid;
+    ctx.beginPath();
+    for(let x=Math.ceil(x0/step)*step; x<=x1; x+=step){ ctx.moveTo(P.X(x)+.5,0); ctx.lineTo(P.X(x)+.5,P.h); }
+    for(let y=Math.ceil(y0/step)*step; y<=y1; y+=step){ ctx.moveTo(0,P.Y(y)+.5); ctx.lineTo(P.w,P.Y(y)+.5); }
+    ctx.stroke();
+    ctx.strokeStyle = C.axis; ctx.lineWidth = 1.4;
+    ctx.beginPath();
+    ctx.moveTo(0,P.Y(0)+.5); ctx.lineTo(P.w,P.Y(0)+.5);
+    ctx.moveTo(P.X(0)+.5,0); ctx.lineTo(P.X(0)+.5,P.h);
+    ctx.stroke();
+    if(labels){
+      ctx.fillStyle = '#9aa5b5'; ctx.font = '11px ui-monospace,Menlo,monospace';
+      ctx.textAlign='center'; ctx.textBaseline='top';
+      for(let x=Math.ceil(x0/step)*step; x<=x1; x+=step){ if(Math.abs(x)>1e-6) ctx.fillText(String(Math.round(x*10)/10), P.X(x), P.Y(0)+5); }
+      ctx.textAlign='right'; ctx.textBaseline='middle';
+      for(let y=Math.ceil(y0/step)*step; y<=y1; y+=step){ if(Math.abs(y)>1e-6) ctx.fillText(String(Math.round(y*10)/10), P.X(0)-6, P.Y(y)); }
+    }
+  };
+  P.line = function(x0,y0,x1,y1,color,w,dash){
+    ctx.save(); ctx.strokeStyle=color; ctx.lineWidth=w||1.5;
+    if(dash) ctx.setLineDash(dash);
+    ctx.beginPath(); ctx.moveTo(P.X(x0),P.Y(y0)); ctx.lineTo(P.X(x1),P.Y(y1)); ctx.stroke(); ctx.restore();
+  };
+  P.arrow = function(x0,y0,x1,y1,color,opt){
+    opt = opt||{};
+    const w = opt.width||2.6, ax0=P.X(x0), ay0=P.Y(y0), ax1=P.X(x1), ay1=P.Y(y1);
+    const dx=ax1-ax0, dy=ay1-ay0, len=Math.hypot(dx,dy);
+    ctx.save();
+    ctx.globalAlpha = opt.alpha==null?1:opt.alpha;
+    ctx.strokeStyle=color; ctx.fillStyle=color; ctx.lineWidth=w; ctx.lineCap='round';
+    if(opt.dash) ctx.setLineDash(opt.dash);
+    if(len>1){
+      const hs = Math.min(13, len*0.34), ux=dx/len, uy=dy/len;
+      ctx.beginPath(); ctx.moveTo(ax0,ay0); ctx.lineTo(ax1-ux*hs*0.85, ay1-uy*hs*0.85); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.beginPath();
+      ctx.moveTo(ax1,ay1);
+      ctx.lineTo(ax1-ux*hs - uy*hs*0.45, ay1-uy*hs + ux*hs*0.45);
+      ctx.lineTo(ax1-ux*hs + uy*hs*0.45, ay1-uy*hs - ux*hs*0.45);
+      ctx.closePath(); ctx.fill();
+    }
+    ctx.restore();
+    if(opt.label){
+      ctx.save();
+      ctx.globalAlpha = opt.alpha==null?1:opt.alpha;
+      ctx.fillStyle=color; ctx.font='600 14px system-ui,-apple-system,sans-serif';
+      ctx.textAlign='left'; ctx.textBaseline='middle';
+      const nx = len>1 ? dx/len : 1, ny = len>1 ? dy/len : 0;
+      ctx.fillText(opt.label, ax1 + nx*14 - (nx<0?ctx.measureText(opt.label).width:0), ay1 + ny*14);
+      ctx.restore();
+    }
+  };
+  P.dot = function(x,y,color,r){
+    ctx.save(); ctx.fillStyle=color; ctx.beginPath();
+    ctx.arc(P.X(x),P.Y(y),r||4,0,7); ctx.fill(); ctx.restore();
+  };
+  P.handle = function(x,y,color){
+    ctx.save();
+    ctx.beginPath(); ctx.arc(P.X(x),P.Y(y),11,0,7);
+    ctx.fillStyle=color; ctx.globalAlpha=.18; ctx.fill();
+    ctx.globalAlpha=1; ctx.strokeStyle=color; ctx.lineWidth=1.6; ctx.stroke();
+    ctx.restore();
+  };
+  P.arc = function(a0,a1,r,color,label){
+    ctx.save(); ctx.strokeStyle=color; ctx.lineWidth=1.6; ctx.globalAlpha=.85;
+    ctx.beginPath(); ctx.arc(P.X(0),P.Y(0), r*P.s, -a0, -a1, a1>a0);
+    ctx.stroke();
+    if(label){ const m=(a0+a1)/2;
+      ctx.fillStyle=color; ctx.globalAlpha=1; ctx.font='12px ui-monospace,Menlo,monospace';
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText(label, P.X(Math.cos(m)*(r+0.42)), P.Y(Math.sin(m)*(r+0.42)));
+    }
+    ctx.restore();
+  };
+  P.text = function(x,y,str,color,font,align){
+    ctx.save(); ctx.fillStyle=color||C.mut;
+    ctx.font=font||'13px system-ui,sans-serif'; ctx.textAlign=align||'left'; ctx.textBaseline='middle';
+    ctx.fillText(str, P.X(x), P.Y(y)); ctx.restore();
+  };
+  P.hud = function(px,py,str,color,font,align){
+    ctx.save(); ctx.fillStyle=color||C.mut;
+    ctx.font=font||'12px system-ui,sans-serif'; ctx.textAlign=align||'left'; ctx.textBaseline='top';
+    ctx.fillText(str,px,py); ctx.restore();
+  };
+  P.fit();
+  REDRAW.push(()=>{ P.fit(); if(P.draw) P.draw(); });
+  return P;
+}
+
+/* 드래그 핸들 */
+function draggable(P, handles, redraw){
+  let active = null;
+  const pick = p => {
+    let best=null, bd=26;
+    handles.forEach(h=>{
+      const g = h.get(); const d = Math.hypot(P.X(g.x)-P.X(p.x), P.Y(g.y)-P.Y(p.y));
+      if(d<bd){ bd=d; best=h; }
+    });
+    return best;
+  };
+  P.cv.addEventListener('pointerdown', e=>{
+    const p = P.evt(e); active = pick(p);
+    if(active){ P.cv.setPointerCapture(e.pointerId); active.set(p.x,p.y); redraw(); e.preventDefault(); }
+    else if(P.onBgDown){ P.onBgDown(e); }
+  });
+  P.cv.addEventListener('pointermove', e=>{
+    const p = P.evt(e);
+    if(active){ active.set(p.x,p.y); redraw(); e.preventDefault(); return; }
+    P.cv.style.cursor = pick(p) ? 'grab' : (P.bgCursor||'crosshair');
+  });
+  const up = ()=>{ active=null; };
+  P.cv.addEventListener('pointerup', up);
+  P.cv.addEventListener('pointercancel', up);
+  P.cv.addEventListener('pointerleave', up);
+}
+
+/* readout / bars */
+function ro(el, rows){
+  el.innerHTML = rows.map(r=>
+    `<div class="row"><span class="k">${r[0]}</span><span class="v" style="color:${r[2]||C.tx}">${r[1]}</span></div>`).join('');
+}
+function makeBars(el, names, colors){
+  el.innerHTML = names.map((n,i)=>
+    `<div class="bar"><span class="nm">${n}</span><span class="track"><span class="fill" data-i="${i}" style="background:${colors[i]}"></span></span><span class="val" data-v="${i}">0.00</span></div>`).join('');
+  const fills = [...el.querySelectorAll('.fill')], vals = [...el.querySelectorAll('.val')];
+  return (i,pct,txt)=>{ fills[i].style.width = clamp(pct,0,100)+'%'; vals[i].textContent = txt; };
+}
+
+/* ══════════════════════════════════════════════
+   사원수 수학 + 3D 렌더러
+   ══════════════════════════════════════════════ */
+const Q4 = {
+  fromAxis(u, ang){ const h=ang/2, s=Math.sin(h); return [Math.cos(h), u[0]*s, u[1]*s, u[2]*s]; },
+  mul(a,b){ return [
+    a[0]*b[0]-a[1]*b[1]-a[2]*b[2]-a[3]*b[3],
+    a[0]*b[1]+a[1]*b[0]+a[2]*b[3]-a[3]*b[2],
+    a[0]*b[2]-a[1]*b[3]+a[2]*b[0]+a[3]*b[1],
+    a[0]*b[3]+a[1]*b[2]-a[2]*b[1]+a[3]*b[0]]; },
+  norm(q){ const l=Math.hypot(q[0],q[1],q[2],q[3])||1; return q.map(v=>v/l); },
+  rot(q,v){
+    const [w,x,y,z]=q;
+    const t0=2*(y*v[2]-z*v[1]), t1=2*(z*v[0]-x*v[2]), t2=2*(x*v[1]-y*v[0]);
+    return [ v[0]+w*t0 + (y*t2-z*t1), v[1]+w*t1 + (z*t0-x*t2), v[2]+w*t2 + (x*t1-y*t0) ];
+  },
+  slerp(a,b,t){
+    let d=a[0]*b[0]+a[1]*b[1]+a[2]*b[2]+a[3]*b[3];
+    let bb=b.slice();
+    if(d<0){ d=-d; bb=bb.map(v=>-v); }
+    if(d>0.9995) return Q4.norm(a.map((v,i)=>v+(bb[i]-v)*t));
+    const th=Math.acos(clamp(d,-1,1)), s=Math.sin(th);
+    const k0=Math.sin((1-t)*th)/s, k1=Math.sin(t*th)/s;
+    return a.map((v,i)=>v*k0+bb[i]*k1);
+  },
+  fromEuler(rx,ry,rz){
+    const qx=Q4.fromAxis([1,0,0],rx), qy=Q4.fromAxis([0,1,0],ry), qz=Q4.fromAxis([0,0,1],rz);
+    return Q4.mul(qz,Q4.mul(qy,qx));
+  }
+};
+
+function mk3D(id, height){
+  const P = mkPlot(id,{range:3.3}); if(!P) return null;
+  P.yaw = RAD(28); P.pitch = RAD(-22); P.D = 7.5; P.bgCursor='grab';
+  P.proj = function(p){
+    const cy=Math.cos(P.yaw), sy=Math.sin(P.yaw);
+    let x = cy*p[0] - sy*p[2], z = sy*p[0] + cy*p[2], y = p[1];
+    const cp=Math.cos(P.pitch), sp=Math.sin(P.pitch);
+    const y2 = cp*y - sp*z, z2 = sp*y + cp*z;
+    const zc = Math.max(0.4, P.D - z2);
+    const k = P.D/zc;
+    return { x:x*k, y:y2*k, z:z2 };
+  };
+  P.p3 = function(p){ const q=P.proj(p); return [P.X(q.x), P.Y(q.y), q.z]; };
+  P.seg3 = function(a,b,color,w,alpha,dash){
+    const A=P.p3(a), B=P.p3(b), ctx=P.ctx;
+    ctx.save(); ctx.strokeStyle=color; ctx.lineWidth=w||2; ctx.globalAlpha=alpha==null?1:alpha;
+    if(dash) ctx.setLineDash(dash);
+    ctx.lineCap='round';
+    ctx.beginPath(); ctx.moveTo(A[0],A[1]); ctx.lineTo(B[0],B[1]); ctx.stroke(); ctx.restore();
+  };
+  P.arrow3 = function(a,b,color,w,label){
+    P.seg3(a,b,color,w||2.6,1);
+    const A=P.p3(a), B=P.p3(b), ctx=P.ctx;
+    const dx=B[0]-A[0], dy=B[1]-A[1], L=Math.hypot(dx,dy)||1, ux=dx/L, uy=dy/L, hs=11;
+    ctx.save(); ctx.fillStyle=color;
+    ctx.beginPath(); ctx.moveTo(B[0],B[1]);
+    ctx.lineTo(B[0]-ux*hs-uy*hs*0.45, B[1]-uy*hs+ux*hs*0.45);
+    ctx.lineTo(B[0]-ux*hs+uy*hs*0.45, B[1]-uy*hs-ux*hs*0.45);
+    ctx.closePath(); ctx.fill();
+    if(label){ ctx.font='600 13px system-ui,sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText(label, B[0]+ux*15, B[1]+uy*15); }
+    ctx.restore();
+  };
+  P.floor = function(){
+    const N=3, st=1;
+    for(let i=-N;i<=N;i+=st){
+      P.seg3([i,-1.55,-N],[i,-1.55,N], '#d3dbe8',1,1);
+      P.seg3([-N,-1.55,i],[N,-1.55,i], '#d3dbe8',1,1);
+    }
+  };
+  P.axes = function(){
+    P.arrow3([0,0,0],[2.5,0,0],'#c98a94',1.8,'x');
+    P.arrow3([0,0,0],[0,2.2,0],'#7fb494',1.8,'y');
+    P.arrow3([0,0,0],[0,0,2.5],'#8aa2bd',1.8,'z');
+  };
+  // 큐브
+  const V = [[-1,-1,-1],[1,-1,-1],[1,1,-1],[-1,1,-1],[-1,-1,1],[1,-1,1],[1,1,1],[-1,1,1]];
+  const FA = [
+    {i:[0,1,2,3], c:'#5573e2'}, {i:[5,4,7,6], c:'#e26e90'},
+    {i:[4,0,3,7], c:'#e2ab5b'}, {i:[1,5,6,2], c:'#4fd0a5'},
+    {i:[3,2,6,7], c:'#9b78e2'}, {i:[4,5,1,0], c:'#939db0'}
+  ];
+  P.cube = function(q, scale, offset, edgeColor){
+    scale = scale||1; offset = offset||[0,0,0];
+    const pts = V.map(v=>{
+      const r = Q4.rot(q, [v[0]*scale, v[1]*scale, v[2]*scale]);
+      return P.p3([r[0]+offset[0], r[1]+offset[1], r[2]+offset[2]]);
+    });
+    const faces = FA.map(f=>({ f, z:(pts[f.i[0]][2]+pts[f.i[1]][2]+pts[f.i[2]][2]+pts[f.i[3]][2])/4 }))
+                    .sort((a,b)=>a.z-b.z);
+    const ctx=P.ctx;
+    faces.forEach(o=>{
+      const p=o.f.i.map(k=>pts[k]);
+      ctx.save();
+      ctx.beginPath(); ctx.moveTo(p[0][0],p[0][1]);
+      for(let i=1;i<4;i++) ctx.lineTo(p[i][0],p[i][1]);
+      ctx.closePath();
+      ctx.fillStyle=o.f.c; ctx.globalAlpha=0.88; ctx.fill();
+      ctx.globalAlpha=1; ctx.lineWidth=1.6; ctx.strokeStyle= edgeColor || 'rgba(20,30,50,.32)'; ctx.stroke();
+      ctx.restore();
+    });
+    return pts;
+  };
+  // 시점 드래그
+  let drag=null;
+  P.cv.addEventListener('pointerdown', e=>{
+    if(P.blockBg && P.blockBg(e)) return;
+    drag={x:e.clientX,y:e.clientY}; P.cv.setPointerCapture(e.pointerId); P.cv.style.cursor='grabbing';
+  });
+  P.cv.addEventListener('pointermove', e=>{
+    if(!drag) return;
+    P.yaw += (e.clientX-drag.x)*0.01;
+    P.pitch = clamp(P.pitch + (e.clientY-drag.y)*0.01, -1.4, 1.4);
+    drag={x:e.clientX,y:e.clientY};
+    if(P.draw) P.draw();
+  });
+  const up=()=>{ drag=null; P.cv.style.cursor='grab'; };
+  P.cv.addEventListener('pointerup',up); P.cv.addEventListener('pointerleave',up); P.cv.addEventListener('pointercancel',up);
+  P.cv.style.cursor='grab';
+  return P;
+}
+
+
+/* ══════════════════════════════════════════════
+   여기부터 그림들
+   ══════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════
+   이 페이지 전용 작은 그리기 도우미 (라이브러리 아님)
+   ══════════════════════════════════════════════ */
+function rr(ctx,x,y,w,h,r){
+  r = Math.min(r, w/2, h/2);
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);
+  ctx.lineTo(x+w-r,y); ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+  ctx.lineTo(x+w,y+h-r); ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+  ctx.lineTo(x+r,y+h); ctx.quadraticCurveTo(x,y+h,x,y+h-r);
+  ctx.lineTo(x,y+r); ctx.quadraticCurveTo(x,y,x+r,y);
+  ctx.closePath();
+}
+/* 상자 하나 그리기 — o = {title, sub, color, off, alpha} */
+function pbox(P,x,y,w,h,o){
+  o = o||{};
+  const ctx = P.ctx, col = o.color||C.a;
+  ctx.save();
+  ctx.globalAlpha = o.alpha==null?1:o.alpha;
+  rr(ctx,x,y,w,h,10);
+  if(o.off){
+    ctx.fillStyle='#f4f6fa'; ctx.fill();
+    ctx.setLineDash([5,4]); ctx.strokeStyle='#c3ccda'; ctx.lineWidth=1.4; ctx.stroke();
+    ctx.setLineDash([]);
+  } else {
+    ctx.fillStyle = o.solid ? col : '#ffffff'; ctx.fill();
+    ctx.strokeStyle = col; ctx.lineWidth = 1.8; ctx.stroke();
+  }
+  if(o.title){
+    ctx.fillStyle = o.off ? '#a6b0be' : (o.solid ? '#fff' : col);
+    ctx.font='700 13px ui-monospace,Menlo,monospace';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(o.title, x+w/2, y+(o.sub? h/2-9 : h/2));
+  }
+  if(o.sub){
+    ctx.fillStyle = o.off ? '#b8c0cc' : (o.solid ? 'rgba(255,255,255,.85)' : '#5a6675');
+    ctx.font='12px system-ui,-apple-system,sans-serif';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(o.sub, x+w/2, y+h/2+10);
+  }
+  ctx.restore();
+}
+/* 픽셀 좌표 화살표 */
+function parrow(P,x0,y0,x1,y1,col,w,dash){
+  const ctx=P.ctx, dx=x1-x0, dy=y1-y0, L=Math.hypot(dx,dy)||1, ux=dx/L, uy=dy/L, hs=9;
+  ctx.save(); ctx.strokeStyle=col; ctx.fillStyle=col; ctx.lineWidth=w||2; ctx.lineCap='round';
+  if(dash) ctx.setLineDash(dash);
+  ctx.beginPath(); ctx.moveTo(x0,y0); ctx.lineTo(x1-ux*hs*0.9,y1-uy*hs*0.9); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.beginPath(); ctx.moveTo(x1,y1);
+  ctx.lineTo(x1-ux*hs-uy*hs*0.5, y1-uy*hs+ux*hs*0.5);
+  ctx.lineTo(x1-ux*hs+uy*hs*0.5, y1-uy*hs-ux*hs*0.5);
+  ctx.closePath(); ctx.fill(); ctx.restore();
+}
+/* 픽셀 좌표 글자 */
+function ptext(P,x,y,str,col,font,align,baseline){
+  const ctx=P.ctx; ctx.save();
+  ctx.fillStyle=col||C.mut; ctx.font=font||'12px system-ui,-apple-system,sans-serif';
+  ctx.textAlign=align||'left'; ctx.textBaseline=baseline||'middle';
+  ctx.fillText(str,x,y); ctx.restore();
+}
+/* 가로 막대 (픽셀) */
+function pbar(P,x,y,w,h,frac,col,label,valTxt){
+  const ctx=P.ctx; ctx.save();
+  rr(ctx,x,y,w,h,h/2); ctx.fillStyle='#eef2f8'; ctx.fill();
+  ctx.strokeStyle='#dfe5ee'; ctx.lineWidth=1; ctx.stroke();
+  const fw = Math.max(0, Math.min(1,frac))*w;
+  if(fw>2){ rr(ctx,x,y,fw,h,h/2); ctx.fillStyle=col; ctx.fill(); }
+  ctx.restore();
+  if(label) ptext(P,x,y-11,label,'#5a6675','12px system-ui,sans-serif','left');
+  if(valTxt) ptext(P,x+w,y-11,valTxt,col,'600 12px ui-monospace,Menlo,monospace','right');
+}
+/* 재현 가능한 난수 (Math.random 대신) */
+function lcg(seed){ let s=seed>>>0; return ()=>{ s=(s*1664525+1013904223)>>>0; return s/4294967296; }; }
+
+/* ══════════════════════════════════════════════
+   그림 1 — 모델의 세 덩어리 조립기
+   ══════════════════════════════════════════════ */
+(function(){
+  const P = mkPlot('cv-parts', {range:4}); if(!P) return;
+  const st = {arch:true, data:true, code:true, w1:0.5, w2:-1.2};
+  const bias = 0.3, inp = [4,1];
+  const el = document.getElementById('ro-parts');
+
+  P.draw = function(){
+    P.clear();
+    const ctx = P.ctx;
+    const bw = Math.min(200, P.w*0.30), bh = 62;
+    const lx = 24, gap = 22;
+    const top = 46;
+
+    ptext(P,lx,24,'모델 = 세 덩어리','#1b2432','700 14px system-ui,sans-serif');
+
+    pbox(P,lx,top,bw,bh,{title:'Model Architecture', sub:'설계도 · config.json', color:C.a, off:!st.arch});
+    pbox(P,lx,top+bh+gap,bw,bh,{title:'Model Data', sub:'weight · bias', color:C.b, off:!st.data});
+    pbox(P,lx,top+2*(bh+gap),bw,bh,{title:'Model Execution Code', sub:'로드 + inference', color:C.e, off:!st.code});
+
+    const cx2 = lx+bw+52;
+    const ok = st.arch && st.data && st.code;
+    for(let i=0;i<3;i++){
+      const y = top+i*(bh+gap)+bh/2;
+      const on = [st.arch,st.data,st.code][i];
+      parrow(P,lx+bw+8,y,cx2-8,top+bh+gap+bh/2,on?[C.a,C.b,C.e][i]:'#d3dae4',on?2:1.4,on?null:[4,4]);
+    }
+
+    const rw = Math.min(240, P.w-cx2-30), rh = 118;
+    const ry = top+bh+gap+bh/2-rh/2;
+    const out = st.w1*inp[0] + st.w2*inp[1] + bias;
+
+    if(ok){
+      pbox(P,cx2,ry,rw,rh,{color:C.c});
+      ptext(P,cx2+rw/2,ry+22,'inference 성공','#15803d','700 13px system-ui,sans-serif','center');
+      ptext(P,cx2+rw/2,ry+48,'입력 [4, 1]','#5a6675','12px ui-monospace,Menlo,monospace','center');
+      ptext(P,cx2+rw/2,ry+78,'출력  '+F(out,3),'#15803d','700 22px ui-monospace,Menlo,monospace','center');
+    } else {
+      pbox(P,cx2,ry,rw,rh,{color:C.d});
+      ptext(P,cx2+rw/2,ry+22,'실행 실패','#c2185b','700 13px system-ui,sans-serif','center');
+      let msg1='', msg2='';
+      if(!st.arch){ msg1='config.json 이 없습니다'; msg2='구조를 세울 수 없어 로드 자체가 안 됩니다'; }
+      else if(!st.data){ msg1='weight 파일이 없습니다'; msg2='구조는 있지만 숫자가 랜덤 → 결과가 무의미'; }
+      else { msg1='실행 코드가 없습니다'; msg2='모델은 준비됐지만 부를 사람이 없습니다'; }
+      ptext(P,cx2+rw/2,ry+56,msg1,'#c2185b','600 13px system-ui,sans-serif','center');
+      const words = msg2.split(' ');
+      let line='', lines=[];
+      ctx.save(); ctx.font='12px system-ui,sans-serif';
+      words.forEach(w=>{ const t=line?line+' '+w:w; if(ctx.measureText(t).width>rw-24){ lines.push(line); line=w; } else line=t; });
+      ctx.restore(); lines.push(line);
+      lines.forEach((L,i)=> ptext(P,cx2+rw/2,ry+80+i*16,L,'#8a94a3','12px system-ui,sans-serif','center'));
+    }
+
+    ptext(P,lx,P.h-16,'버튼으로 덩어리를 끄고 켜보세요','#8a94a3','12px system-ui,sans-serif');
+
+    ro(el, [
+      ['weight 1', F(st.w1), C.b],
+      ['weight 2', F(st.w2), C.b],
+      ['bias', F(bias), C.b],
+      ['입력', '[4, 1]', C.a],
+      ['계산', F(st.w1*4)+' + '+F(st.w2*1)+' + '+F(bias)],
+      ['출력', ok? F(out,3) : '—', ok?C.c:C.d]
+    ]);
+  };
+
+  function bind(id, key){
+    const b = document.getElementById(id);
+    b.addEventListener('click', ()=>{ st[key]=!st[key]; b.classList.toggle('on', st[key]); P.draw(); });
+  }
+  bind('btn-parts-arch','arch'); bind('btn-parts-data','data'); bind('btn-parts-code','code');
+
+  const s1=document.getElementById('sl-parts-w1'), s2=document.getElementById('sl-parts-w2');
+  s1.addEventListener('input',()=>{ st.w1=+s1.value; document.getElementById('lb-parts-w1').textContent=F(st.w1); P.draw(); });
+  s2.addEventListener('input',()=>{ st.w2=+s2.value; document.getElementById('lb-parts-w2').textContent=F(st.w2); P.draw(); });
+  P.draw();
+})();
+
+/* ══════════════════════════════════════════════
+   그림 2 — 모델 생명주기 링
+   ══════════════════════════════════════════════ */
+(function(){
+  const P = mkPlot('cv-life', {range:4}); if(!P) return;
+  const el = document.getElementById('ro-life');
+  const S = [
+    {n:'Data Collection', k:'데이터 수집', side:'train', role:'로그·문서·센서·사용자 데이터를 모읍니다', m:'데이터 양 · 품질 · 편향'},
+    {n:'Training',        k:'학습',       side:'train', role:'데이터에서 패턴을 배웁니다 (weight를 고쳐 나감)', m:'loss · 학습 시간 · GPU 사용량'},
+    {n:'Evaluation',      k:'평가',       side:'train', role:'정확도와 benchmark로 검증합니다', m:'accuracy · loss · benchmark 점수'},
+    {n:'Deployment',      k:'배포',       side:'serve', role:'버전이 붙은 소프트웨어 산출물로 포장합니다', m:'이미지 크기 · 롤백 가능 여부'},
+    {n:'Serving',         k:'서빙',       side:'serve', role:'API로 실제 요청을 받아 예측을 반환합니다', m:'latency · throughput · 에러율'},
+    {n:'Optimization',    k:'최적화',     side:'serve', role:'속도·비용·안정성을 개선합니다', m:'cost per request · GPU 활용률 · p99'},
+    {n:'Retraining',      k:'재학습',     side:'train', role:'운영 데이터를 다시 학습에 반영합니다', m:'데이터 드리프트 · 재학습 주기'}
+  ];
+  let cur = 0;
+  const pos = [];
+
+  P.draw = function(){
+    P.clear();
+    const cx = P.w*0.44, cy = P.h*0.52;
+    const R = Math.min(P.w*0.30, P.h*0.34);
+    pos.length = 0;
+    for(let i=0;i<S.length;i++){
+      const a = -Math.PI/2 + i*2*Math.PI/S.length;
+      pos.push([cx+Math.cos(a)*R, cy+Math.sin(a)*R]);
+    }
+    const ctx = P.ctx;
+    ctx.save(); ctx.strokeStyle='#e4eaf3'; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.arc(cx,cy,R,0,7); ctx.stroke(); ctx.restore();
+
+    for(let i=0;i<S.length;i++){
+      const j=(i+1)%S.length;
+      const a0=Math.atan2(pos[i][1]-cy,pos[i][0]-cx), a1=Math.atan2(pos[j][1]-cy,pos[j][0]-cx);
+      const am=a0+((a1-a0+Math.PI*3)%(Math.PI*2)-Math.PI)/2;
+      const mx=cx+Math.cos(am)*R, my=cy+Math.sin(am)*R;
+      parrow(P,mx-Math.sin(am)*7,my+Math.cos(am)*7,mx+Math.sin(am)*7,my-Math.cos(am)*7,'#c8d2e0',1.6);
+    }
+
+    for(let i=0;i<S.length;i++){
+      const [x,y]=pos[i], on = i===cur;
+      const col = S[i].side==='train' ? C.a : C.c;
+      ctx.save();
+      ctx.beginPath(); ctx.arc(x,y,on?21:15,0,7);
+      ctx.fillStyle = on ? col : '#ffffff'; ctx.fill();
+      ctx.strokeStyle = col; ctx.lineWidth = on?2.4:1.6; ctx.stroke();
+      if(on){ ctx.beginPath(); ctx.arc(x,y,28,0,7); ctx.strokeStyle=col; ctx.globalAlpha=.28; ctx.lineWidth=2; ctx.stroke(); }
+      ctx.restore();
+      ptext(P,x,y,String(i+1),on?'#fff':col,'700 12px ui-monospace,Menlo,monospace','center');
+      const ang = Math.atan2(y-cy,x-cx);
+      const tx = x+Math.cos(ang)*38, ty = y+Math.sin(ang)*36;
+      const al = Math.abs(Math.cos(ang))<0.35 ? 'center' : (Math.cos(ang)>0?'left':'right');
+      ptext(P,tx,ty,S[i].n,on?'#0b1220':'#8a94a3',(on?'700 ':'')+'12px system-ui,sans-serif',al);
+    }
+
+    ptext(P,cx,cy-12,S[cur].k,'#0b1220','700 17px system-ui,sans-serif','center');
+    ptext(P,cx,cy+12,S[cur].side==='train'?'학습 쪽':'서빙 쪽',S[cur].side==='train'?C.a:C.c,'600 12px system-ui,sans-serif','center');
+    ptext(P,14,P.h-14,'원 위의 단계를 클릭해도 됩니다','#8a94a3','12px system-ui,sans-serif');
+
+    ro(el, [
+      ['단계', (cur+1)+'. '+S[cur].n, S[cur].side==='train'?C.a:C.c],
+      ['하는 일', S[cur].k],
+      ['보는 지표', S[cur].m, C.b],
+      ['다음', S[(cur+1)%S.length].n, C.mut]
+    ]);
+  };
+
+  const s = document.getElementById('sl-life');
+  function setCur(i){
+    cur = clamp(i,0,S.length-1);
+    s.value = cur;
+    document.getElementById('lb-life').textContent = (cur+1)+' / '+S.length;
+    P.draw();
+  }
+  s.addEventListener('input', ()=> setCur(+s.value));
+  P.cv.addEventListener('pointerdown', e=>{
+    const r = P.cv.getBoundingClientRect();
+    const mx = (e.clientX-r.left)*(P.cv.clientWidth/r.width);
+    const my = (e.clientY-r.top)*(P.cv.clientHeight/r.height);
+    let best=-1, bd=34;
+    pos.forEach((p,i)=>{ const d=Math.hypot(p[0]-mx,p[1]-my); if(d<bd){bd=d;best=i;} });
+    if(best>=0) setCur(best);
+  });
+  P.cv.style.cursor='pointer';
+  setCur(0);
+})();
+
+/* ══════════════════════════════════════════════
+   그림 3 — 요청 하나의 여정 (TTFT / TPOT)
+   ══════════════════════════════════════════════ */
+(function(){
+  const P = mkPlot('cv-flow', {range:4}); if(!P) return;
+  const el = document.getElementById('ro-flow');
+  const st = {n:12, ttft:0.4, tpot:0.03, t:0, playing:false};
+  let raf=null, last=0;
+
+  function total(){ return st.ttft + (st.n-1)*st.tpot; }
+
+  P.draw = function(){
+    P.clear();
+    const T = total();
+    const t = st.t;
+    const stages = ['Client','API Server','Model (GPU)','Response'];
+    const bw = Math.min(132, (P.w-70)/4), gap = (P.w-40-bw*4)/3;
+    const y0 = 34;
+
+    for(let i=0;i<4;i++){
+      const x = 20+i*(bw+gap);
+      let active=false;
+      if(t>0){
+        if(i===0) active = t < st.ttft*0.25;
+        else if(i===1) active = t>=st.ttft*0.2 && t<st.ttft*0.45;
+        else if(i===2) active = t>=st.ttft*0.4 && t<T;
+        else active = t>=st.ttft;
+      }
+      pbox(P,x,y0,bw,50,{title:stages[i], color:active?C.a:'#c3ccda', solid:active});
+      if(i<3) parrow(P,x+bw+4,y0+25,x+bw+gap-4,y0+25, t>0?C.a:'#d3dae4',1.8);
+    }
+
+    const py = y0+82;
+    ptext(P,20,py-12,'TTFT — 첫 토큰까지','#5a6675','12px system-ui,sans-serif');
+    ptext(P,P.w-20,py-12,F(st.ttft)+'초',C.d,'600 12px ui-monospace,Menlo,monospace','right');
+    const barW = P.w-40;
+    const ttftFrac = st.ttft/T;
+    const ctx=P.ctx;
+    ctx.save(); rr(ctx,20,py,barW,14,7); ctx.fillStyle='#eef2f8'; ctx.fill(); ctx.restore();
+    ctx.save(); rr(ctx,20,py,barW*ttftFrac,14,7); ctx.fillStyle='rgba(194,24,91,.28)'; ctx.fill(); ctx.restore();
+    const done = clamp(t/T,0,1);
+    ctx.save(); rr(ctx,20,py,barW*done,14,7); ctx.fillStyle= t<st.ttft? C.d : C.c; ctx.globalAlpha=.85; ctx.fill(); ctx.restore();
+    ctx.save(); ctx.strokeStyle='#c2185b'; ctx.lineWidth=1.5; ctx.setLineDash([3,3]);
+    ctx.beginPath(); ctx.moveTo(20+barW*ttftFrac, py-4); ctx.lineTo(20+barW*ttftFrac, py+18); ctx.stroke(); ctx.restore();
+
+    const ty = py+48;
+    ptext(P,20,ty-14,'생성된 토큰','#5a6675','12px system-ui,sans-serif');
+    const shown = t<=st.ttft ? (t>0?0:0) : Math.min(st.n, 1+Math.floor((t-st.ttft)/st.tpot));
+    ptext(P,P.w-20,ty-14,shown+' / '+st.n, shown>0?C.c:'#8a94a3','600 12px ui-monospace,Menlo,monospace','right');
+    const cols = Math.min(20, st.n);
+    const cw = Math.min(26, (P.w-46)/cols);
+    for(let i=0;i<st.n;i++){
+      const r = Math.floor(i/cols), c = i%cols;
+      const x = 20+c*(cw+3), y = ty+r*(cw+3);
+      ctx.save(); rr(ctx,x,y,cw,cw,4);
+      if(i<shown){ ctx.fillStyle=C.c; ctx.globalAlpha= i===shown-1?1:.72; ctx.fill(); }
+      else { ctx.fillStyle='#f1f4f9'; ctx.fill(); ctx.strokeStyle='#e2e8f1'; ctx.lineWidth=1; ctx.stroke(); }
+      ctx.restore();
+    }
+
+    ptext(P,20,P.h-16, st.playing? '재생 중…' : (t>=T&&t>0 ? '완료 — 다시 보려면 [처음으로]' : '▶ 재생을 눌러보세요'),'#8a94a3','12px system-ui,sans-serif');
+
+    ro(el, [
+      ['출력 토큰', st.n+'개', C.a],
+      ['TTFT', F(st.ttft)+'초', C.d],
+      ['TPOT', F(st.tpot,3)+'초', C.b],
+      ['전체 지연', F(T,2)+'초', C.c],
+      ['TTFT 비중', Math.round(ttftFrac*100)+'%'],
+      ['경과', F(clamp(t,0,T),2)+'초']
+    ]);
+  };
+
+  function tick(now){
+    if(!st.playing) return;
+    const T = total();
+    const speed = T>4 ? T/4 : 1;
+    const dt = (now-last)/1000; last = now;
+    st.t += dt*speed;
+    if(st.t>=T){ st.t=T; st.playing=false; document.getElementById('btn-flow-play').classList.remove('on'); }
+    P.draw();
+    if(st.playing) raf = requestAnimationFrame(tick);
+  }
+  const btnP = document.getElementById('btn-flow-play');
+  btnP.addEventListener('click', ()=>{
+    if(st.playing){ st.playing=false; btnP.classList.remove('on'); if(raf) cancelAnimationFrame(raf); P.draw(); return; }
+    if(st.t>=total()) st.t=0;
+    st.playing=true; btnP.classList.add('on'); last=performance.now(); raf=requestAnimationFrame(tick);
+  });
+  document.getElementById('btn-flow-reset').addEventListener('click', ()=>{
+    st.playing=false; btnP.classList.remove('on'); if(raf) cancelAnimationFrame(raf); st.t=0; P.draw();
+  });
+  function sl(id,lbl,key,fmt){
+    const s=document.getElementById(id);
+    s.addEventListener('input',()=>{ st[key]=+s.value; document.getElementById(lbl).textContent=fmt(st[key]); if(st.t>total()) st.t=total(); P.draw(); });
+  }
+  sl('sl-flow-n','lb-flow-n','n', v=>String(v));
+  sl('sl-flow-ttft','lb-flow-ttft','ttft', v=>F(v));
+  sl('sl-flow-tpot','lb-flow-tpot','tpot', v=>F(v,3));
+  P.draw();
+})();
+
+/* ══════════════════════════════════════════════
+   그림 4 — latency · throughput · cost 저울
+   ══════════════════════════════════════════════ */
+(function(){
+  const P = mkPlot('cv-tradeoff', {range:4}); if(!P) return;
+  const el = document.getElementById('ro-tradeoff');
+  const setBar = makeBars(document.getElementById('ro-tradeoff-bars'),
+    ['req/s','latency','$/req','GPU%'], [C.c, C.d, C.b, C.a]);
+  const st = {b:8, gpu:2, load:20};
+  const GPU_HOUR = 2.5;
+
+  function calc(b, gpu, load){
+    const perGpu = 40*b/(b+10);
+    const thr = perGpu*gpu;
+    const util = load/thr;
+    const svc = 60 + b*9;
+    const q = util<0.98 ? svc*util/(1-util) : svc*60;
+    const lat = svc + Math.min(q, 20000);
+    const eff = Math.min(load, thr);
+    const cost = eff>0.01 ? (GPU_HOUR*gpu/3600)/eff : 0;
+    return {thr, util:Math.min(util,1), lat, cost, sat:util>=1};
+  }
+
+  P.draw = function(){
+    P.clear();
+    const m = calc(st.b, st.gpu, st.load);
+    const padL = 46, padR = 18, padT = 30, padB = 34;
+    const w = P.w-padL-padR, h = P.h-padT-padB;
+    const ctx = P.ctx;
+
+    ctx.save(); ctx.strokeStyle='#e9eef6'; ctx.lineWidth=1;
+    for(let i=0;i<=4;i++){ const y=padT+h*i/4; ctx.beginPath(); ctx.moveTo(padL,y+.5); ctx.lineTo(padL+w,y+.5); ctx.stroke(); }
+    ctx.strokeStyle='#aab5c6'; ctx.lineWidth=1.4;
+    ctx.beginPath(); ctx.moveTo(padL,padT); ctx.lineTo(padL,padT+h); ctx.lineTo(padL+w,padT+h); ctx.stroke();
+    ctx.restore();
+
+    ptext(P,padL,16,'batch size를 키우면 (가로축)','#8a94a3','12px system-ui,sans-serif');
+    ptext(P,padL-8,padT,'높음','#9aa5b5','11px ui-monospace,Menlo,monospace','right');
+    ptext(P,padL-8,padT+h,'낮음','#9aa5b5','11px ui-monospace,Menlo,monospace','right');
+    ptext(P,padL,padT+h+16,'1','#9aa5b5','11px ui-monospace,Menlo,monospace','center');
+    ptext(P,padL+w,padT+h+16,'64','#9aa5b5','11px ui-monospace,Menlo,monospace','right');
+    ptext(P,padL+w/2,padT+h+16,'batch size','#8a94a3','12px system-ui,sans-serif','center');
+
+    const X = b => padL + (b-1)/63*w;
+    let maxThr = 0, maxLat = 0;
+    for(let b=1;b<=64;b++){ const c=calc(b,st.gpu,st.load); maxThr=Math.max(maxThr,c.thr); maxLat=Math.max(maxLat,Math.min(c.lat,4000)); }
+    maxLat = Math.max(maxLat, 400);
+
+    function curve(fn, col, lbl){
+      ctx.save(); ctx.strokeStyle=col; ctx.lineWidth=2.4; ctx.lineJoin='round'; ctx.beginPath();
+      for(let b=1;b<=64;b++){ const v=fn(b); const y=padT+h*(1-clamp(v,0,1)); if(b===1) ctx.moveTo(X(b),y); else ctx.lineTo(X(b),y); }
+      ctx.stroke(); ctx.restore();
+      const yEnd = padT+h*(1-clamp(fn(64),0,1));
+      ptext(P,padL+w-4,yEnd-12,lbl,col,'700 12px system-ui,sans-serif','right');
+    }
+    curve(b=>calc(b,st.gpu,st.load).thr/maxThr, C.c, 'throughput');
+    curve(b=>Math.min(calc(b,st.gpu,st.load).lat,4000)/maxLat, C.d, 'latency');
+
+    const mx = X(st.b);
+    ctx.save(); ctx.strokeStyle=C.a; ctx.lineWidth=1.6; ctx.setLineDash([4,4]);
+    ctx.beginPath(); ctx.moveTo(mx,padT); ctx.lineTo(mx,padT+h); ctx.stroke(); ctx.restore();
+    const yT = padT+h*(1-clamp(m.thr/maxThr,0,1));
+    const yL = padT+h*(1-clamp(Math.min(m.lat,4000)/maxLat,0,1));
+    ctx.save(); ctx.fillStyle=C.c; ctx.beginPath(); ctx.arc(mx,yT,5,0,7); ctx.fill();
+    ctx.fillStyle=C.d; ctx.beginPath(); ctx.arc(mx,yL,5,0,7); ctx.fill(); ctx.restore();
+    ptext(P,mx,padT-2,'지금','#2563eb','700 11px system-ui,sans-serif','center');
+
+    if(m.sat){
+      ctx.save(); ctx.fillStyle='rgba(194,24,91,.07)'; ctx.fillRect(padL,padT,w,h); ctx.restore();
+      ptext(P,padL+w/2,padT+h/2,'포화 — 들어오는 요청이 처리 능력을 넘었습니다',C.d,'700 13px system-ui,sans-serif','center');
+    }
+
+    setBar(0, m.thr/300*100, Math.round(m.thr)+'/s');
+    setBar(1, Math.min(m.lat,3000)/3000*100, m.lat>9000? '터짐' : Math.round(m.lat)+'ms');
+    setBar(2, m.cost/0.01*100, '$'+m.cost.toFixed(5));
+    setBar(3, m.util*100, Math.round(m.util*100)+'%');
+
+    ro(el, [
+      ['batch size', String(st.b), C.a],
+      ['GPU 대수', String(st.gpu), C.a],
+      ['처리 능력', Math.round(m.thr)+' req/s', C.c],
+      ['도착 요청', st.load+' req/s', C.b],
+      ['시간당 GPU 비용', '$'+(GPU_HOUR*st.gpu).toFixed(2)],
+      ['상태', m.sat? '포화' : '안정', m.sat?C.d:C.c]
+    ]);
+  };
+
+  function sl(id,lbl,key){
+    const s=document.getElementById(id);
+    s.addEventListener('input',()=>{ st[key]=+s.value; document.getElementById(lbl).textContent=s.value; P.draw(); });
+  }
+  sl('sl-tr-batch','lb-tr-batch','b');
+  sl('sl-tr-gpu','lb-tr-gpu','gpu');
+  sl('sl-tr-load','lb-tr-load','load');
+  P.draw();
+})();
+
+/* ══════════════════════════════════════════════
+   그림 5 — 대기열 절벽
+   ══════════════════════════════════════════════ */
+(function(){
+  const P = mkPlot('cv-queue', {range:8.6, ox:0.045, oy:0.93}); if(!P) return;
+  const el = document.getElementById('ro-queue');
+  const st = {arr:7, srv:10, opt:1};
+  const CAPY = 16.0;
+
+  function mu(){ return st.srv*st.opt; }
+  function W(lam){ const m=mu(); return lam<m ? 1/(m-lam) : Infinity; }
+
+  P.draw = function(){
+    P.clear();
+    P.grid(2, true);
+    const m = mu();
+    const ctx = P.ctx;
+
+    ctx.save(); ctx.strokeStyle=C.d; ctx.lineWidth=1.8; ctx.setLineDash([5,4]);
+    ctx.beginPath(); ctx.moveTo(P.X(m), P.Y(0)); ctx.lineTo(P.X(m), P.Y(CAPY)); ctx.stroke(); ctx.restore();
+    P.text(m, CAPY*0.97, '  처리율 한계 '+F(m,1)+'/s', C.d, '600 12px system-ui,sans-serif');
+
+    ctx.save(); ctx.strokeStyle=C.c; ctx.lineWidth=2.6; ctx.lineJoin='round'; ctx.beginPath();
+    let started=false;
+    for(let lam=0.2; lam<m; lam+=0.05){
+      const w = Math.min(W(lam), CAPY);
+      if(!started){ ctx.moveTo(P.X(lam),P.Y(w)); started=true; } else ctx.lineTo(P.X(lam),P.Y(w));
+      if(w>=CAPY) break;
+    }
+    ctx.stroke(); ctx.restore();
+
+    ctx.save(); ctx.fillStyle='rgba(194,24,91,.06)';
+    ctx.fillRect(P.X(m), P.Y(CAPY), Math.max(0,P.w-P.X(m)), P.Y(0)-P.Y(CAPY)); ctx.restore();
+    if(P.w-P.X(m) > 60) P.text(m+(20-m)/2, CAPY*0.5, '포화 구간', C.d, '700 13px system-ui,sans-serif', 'center');
+
+    const w0 = W(st.arr);
+    const wy = Math.min(w0, CAPY);
+    if(st.arr < m){
+      P.line(st.arr, 0, st.arr, wy, C.a, 1.4, [4,4]);
+      P.handle(st.arr, wy, C.a);
+      P.dot(st.arr, wy, C.a, 5);
+      P.text(st.arr, wy+0.9, '  '+F(w0,2)+'초', C.a, '700 13px ui-monospace,Menlo,monospace');
+    } else {
+      P.line(st.arr, 0, st.arr, CAPY, C.d, 2, [4,4]);
+      P.handle(st.arr, CAPY*0.5, C.d);
+      P.text(st.arr, CAPY*0.55, '  무한히 증가', C.d, '700 13px system-ui,sans-serif');
+    }
+
+    P.hud(P.w-14, 12, '세로: 평균 응답시간(초)', '#8a94a3', '12px system-ui,sans-serif', 'right');
+    P.hud(P.w-14, 30, '가로: 초당 도착 요청', '#8a94a3', '12px system-ui,sans-serif', 'right');
+    P.hud(12, 12, '파란 점을 좌우로 끌어보세요', '#8a94a3', '12px system-ui,sans-serif');
+
+    const rho = st.arr/m;
+    ro(el, [
+      ['도착률 λ', F(st.arr,1)+' /s', C.a],
+      ['처리율 μ', F(m,1)+' /s', C.c],
+      ['이용률 ρ', F(rho*100,0)+'%', rho>=1?C.d:(rho>0.85?C.b:C.c)],
+      ['평균 응답', st.arr<m? F(w0,2)+'초' : '∞', st.arr<m?C.tx:C.d],
+      ['여유', st.arr<m? F(m-st.arr,1)+' /s' : '없음', st.arr<m?C.mut:C.d],
+      ['상태', st.arr>=m?'포화':(rho>0.85?'위험':'안정'), st.arr>=m?C.d:(rho>0.85?C.b:C.c)]
+    ]);
+  };
+
+  const sA=document.getElementById('sl-q-arr'), sS=document.getElementById('sl-q-srv'), sO=document.getElementById('sl-q-opt');
+  function sync(){
+    document.getElementById('lb-q-arr').textContent = F(st.arr,1);
+    document.getElementById('lb-q-srv').textContent = F(st.srv,1);
+    document.getElementById('lb-q-opt').textContent = F(st.opt,1)+'×';
+    sA.value = st.arr;
+    P.draw();
+  }
+  draggable(P, [{
+    get:()=>{ const w=W(st.arr); return {x:st.arr, y: isFinite(w)? Math.min(w,CAPY) : CAPY*0.5}; },
+    set:(x)=>{ st.arr = clamp(x,0.5,19.5); }
+  }], sync);
+  sA.addEventListener('input',()=>{ st.arr=+sA.value; sync(); });
+  sS.addEventListener('input',()=>{ st.srv=+sS.value; sync(); });
+  sO.addEventListener('input',()=>{ st.opt=+sO.value; sync(); });
+  sync();
+})();
+/* ══════════════════════════════════════════════
+   그림 6 — vLLM 설정 놀이터
+   ══════════════════════════════════════════════ */
+(function(){
+  const P = mkPlot('cv-vllm', {range:4}); if(!P) return;
+  const el = document.getElementById('ro-vllm');
+  const setBar = makeBars(document.getElementById('ro-vllm-bars'),
+    ['tok/s','latency','KV GB','seqs'], [C.c, C.d, C.a, C.b]);
+  const DT = { fp16:{b:2,s:1.00}, bf16:{b:2,s:1.03}, fp8:{b:1,s:1.50} };
+  const st = {seqs:16, util:0.90, tp:1, dt:'fp16'};
+  const PARAMS = 20, GPUMEM = 80;
+
+  function calc(){
+    const d = DT[st.dt];
+    const weight = PARAMS*d.b/st.tp;
+    const usable = GPUMEM*st.util;
+    const kvSpace = usable - weight - 2;
+    const kvPerSeq = 1.1*(d.b/2);
+    const maxFit = Math.max(0, Math.floor(kvSpace/kvPerSeq));
+    const oom = kvSpace < 0.5;
+    const risky = st.util > 0.95;
+    const eff = Math.max(0, Math.min(st.seqs, maxFit));
+    const tpEff = st.tp/(1+0.20*(st.tp-1));
+    const thr = oom? 0 : 1200*eff/(eff+14)*tpEff*d.s;
+    const lat = oom? 0 : (80 + eff*4.5)/d.s*(1+0.05*(st.tp-1));
+    return {weight, usable, kvSpace:Math.max(0,kvSpace), kvPerSeq, maxFit, oom, risky, eff, thr, lat, d};
+  }
+
+  P.draw = function(){
+    P.clear();
+    const m = calc(), ctx = P.ctx;
+    const padL = 20, w = P.w-40;
+    ptext(P,padL,22,'GPU 1장의 메모리 (H100 80GB 기준) — tensor-parallel-size = '+st.tp,'#1b2432','700 13px system-ui,sans-serif');
+
+    const by = 44, bh = 46;
+    ctx.save(); rr(ctx,padL,by,w,bh,8); ctx.fillStyle='#f4f6fa'; ctx.fill();
+    ctx.strokeStyle='#dfe5ee'; ctx.lineWidth=1; ctx.stroke(); ctx.restore();
+
+    const seg = (x0,x1,col,alpha)=>{
+      if(x1-x0<1) return;
+      ctx.save(); ctx.beginPath(); ctx.rect(x0,by,x1-x0,bh);
+      ctx.fillStyle=col; ctx.globalAlpha=alpha==null?1:alpha; ctx.fill(); ctx.restore();
+    };
+    const X = gb => padL + clamp(gb/GPUMEM,0,1)*w;
+    ctx.save(); rr(ctx,padL,by,w,bh,8); ctx.clip();
+    seg(padL, X(m.weight), C.a, .85);
+    seg(X(m.weight), X(m.weight+m.kvSpace), C.c, .55);
+    seg(X(m.usable), padL+w, '#c9d2e0', .55);
+    ctx.restore();
+
+    ctx.save(); ctx.strokeStyle=C.d; ctx.lineWidth=2; ctx.setLineDash([4,3]);
+    ctx.beginPath(); ctx.moveTo(X(m.usable),by-6); ctx.lineTo(X(m.usable),by+bh+6); ctx.stroke(); ctx.restore();
+    ptext(P,X(m.usable),by+bh+18,'--gpu-memory-utilization '+F(st.util,2),C.d,'600 11px ui-monospace,Menlo,monospace',
+      X(m.usable)>P.w*0.6?'right':'left');
+
+    ptext(P,padL+4,by+bh/2,'weights '+F(m.weight,1)+'GB','#fff','700 12px ui-monospace,Menlo,monospace','left');
+    if(X(m.weight+m.kvSpace)-X(m.weight) > 110)
+      ptext(P,(X(m.weight)+X(m.weight+m.kvSpace))/2,by+bh/2,'KV Cache '+F(m.kvSpace,1)+'GB','#0b1220','700 12px ui-monospace,Menlo,monospace','center');
+
+    const iy = by+bh+44;
+    ptext(P,padL,iy,'dtype = '+st.dt+'  ·  파라미터당 '+m.d.b+' byte','#5a6675','12px ui-monospace,Menlo,monospace');
+    ptext(P,padL,iy+22,'KV Cache 1 요청당 약 '+F(m.kvPerSeq,2)+'GB → 최대 '+m.maxFit+'개 동시 수용','#5a6675','12px system-ui,sans-serif');
+    ptext(P,padL,iy+44,'--max-num-seqs '+st.seqs+' → 실제 동시 처리 '+m.eff+'개',
+      m.eff<st.seqs?C.b:C.c,'600 12px system-ui,sans-serif');
+
+    const wy = iy+76;
+    let msg, mcol;
+    if(m.oom){ msg='OOM — weights가 허용 메모리를 넘었습니다. tp를 늘리거나 dtype을 낮추세요.'; mcol=C.d; }
+    else if(m.risky){ msg='위험 — 여유가 거의 없습니다. 입력이 조금만 길어져도 OOM이 납니다.'; mcol=C.b; }
+    else if(m.eff<st.seqs){ msg='KV Cache 부족 — 설정한 max-num-seqs를 다 못 씁니다.'; mcol=C.b; }
+    else { msg='정상 — 설정한 동시 요청 수를 KV Cache가 감당합니다.'; mcol=C.c; }
+    ctx.save(); rr(ctx,padL,wy,w,38,8);
+    ctx.fillStyle = mcol===C.c ? 'rgba(21,128,61,.08)' : (mcol===C.b ? 'rgba(184,105,11,.09)' : 'rgba(194,24,91,.09)');
+    ctx.fill(); ctx.strokeStyle=mcol; ctx.globalAlpha=.4; ctx.lineWidth=1.2; ctx.stroke(); ctx.restore();
+    ptext(P,padL+14,wy+19,msg,mcol,'600 12.5px system-ui,sans-serif');
+
+    setBar(0, m.thr/2200*100, Math.round(m.thr)+' tok/s');
+    setBar(1, Math.min(m.lat,900)/900*100, m.oom? '—' : Math.round(m.lat)+'ms');
+    setBar(2, m.kvSpace/60*100, F(m.kvSpace,1)+'GB');
+    setBar(3, m.eff/128*100, m.eff+'개');
+
+    ro(el, [
+      ['dtype', st.dt, C.a],
+      ['weights', F(m.weight,1)+' GB', C.a],
+      ['사용 허용', F(m.usable,1)+' GB', C.d],
+      ['KV Cache', F(m.kvSpace,1)+' GB', C.c],
+      ['throughput', Math.round(m.thr)+' tok/s', C.c],
+      ['상태', m.oom?'OOM':(m.risky?'위험':'정상'), m.oom?C.d:(m.risky?C.b:C.c)]
+    ]);
+  };
+
+  function sl(id,lbl,key,fmt){
+    const s=document.getElementById(id);
+    s.addEventListener('input',()=>{ st[key]=+s.value; document.getElementById(lbl).textContent=fmt(st[key]); P.draw(); });
+  }
+  sl('sl-v-seqs','lb-v-seqs','seqs', v=>String(v));
+  sl('sl-v-util','lb-v-util','util', v=>F(v,2));
+  sl('sl-v-tp','lb-v-tp','tp', v=>String(v));
+  ['fp16','bf16','fp8'].forEach(k=>{
+    const b = document.getElementById('btn-v-'+k);
+    b.addEventListener('click', ()=>{
+      st.dt = k;
+      ['fp16','bf16','fp8'].forEach(j=>document.getElementById('btn-v-'+j).classList.toggle('on', j===k));
+      P.draw();
+    });
+  });
+  P.draw();
+})();
+
+/* ══════════════════════════════════════════════
+   그림 7 — On-Device vs Cloud
+   ══════════════════════════════════════════════ */
+(function(){
+  const P = mkPlot('cv-edge', {range:4}); if(!P) return;
+  const el = document.getElementById('ro-edge');
+  const setBar = makeBars(document.getElementById('ro-edge-bars'),
+    ['on-dev','cloud','battery'], [C.a, C.b, C.d]);
+  const st = {size:120, mem:1500, net:60};
+
+  function calc(){
+    const fits = st.size <= st.mem*0.7;
+    const dev = 12 + st.size*0.22;
+    const cloud = st.net + 8 + st.size*0.03;
+    const batt = 0.4 + st.size*0.012;
+    return {fits, dev, cloud, batt};
+  }
+
+  P.draw = function(){
+    P.clear();
+    const m = calc(), ctx=P.ctx;
+    const padL = 96, w = P.w-padL-28;
+    const maxV = Math.max(m.dev, m.cloud, 50)*1.12;
+
+    ptext(P,20,22,'응답까지 걸리는 시간 (ms)','#1b2432','700 13px system-ui,sans-serif');
+
+    const rows = [
+      {n:'On-device', v:m.dev, col:C.a, ok:m.fits, note:m.fits? '기기 안에서 바로 실행' : '메모리 부족 — 실행 불가'},
+      {n:'Cloud',     v:m.cloud, col:C.b, ok:true, note:'네트워크 왕복 '+st.net+'ms 포함'}
+    ];
+    rows.forEach((r,i)=>{
+      const y = 52+i*74;
+      ptext(P,padL-12,y+15,r.n,'#0b1220','700 13px system-ui,sans-serif','right');
+      ctx.save(); rr(ctx,padL,y,w,30,8); ctx.fillStyle='#eef2f8'; ctx.fill();
+      ctx.strokeStyle='#dfe5ee'; ctx.lineWidth=1; ctx.stroke(); ctx.restore();
+      if(r.ok){
+        const fw = w*clamp(r.v/maxV,0,1);
+        ctx.save(); rr(ctx,padL,y,Math.max(fw,4),30,8); ctx.fillStyle=r.col; ctx.globalAlpha=.9; ctx.fill(); ctx.restore();
+        ptext(P,padL+Math.max(fw,4)+10,y+15,Math.round(r.v)+' ms',r.col,'700 13px ui-monospace,Menlo,monospace');
+      } else {
+        ctx.save(); rr(ctx,padL,y,w,30,8); ctx.fillStyle='rgba(194,24,91,.10)'; ctx.fill(); ctx.restore();
+        ptext(P,padL+w/2,y+15,'실행 불가 — 모델이 기기 메모리에 안 들어갑니다',C.d,'700 12.5px system-ui,sans-serif','center');
+      }
+      ptext(P,padL,y+46,r.note,'#8a94a3','12px system-ui,sans-serif');
+    });
+
+    const my = 208;
+    ptext(P,20,my,'기기 메모리','#1b2432','700 13px system-ui,sans-serif');
+    const bw = P.w-40;
+    ctx.save(); rr(ctx,20,my+14,bw,26,7); ctx.fillStyle='#f4f6fa'; ctx.fill();
+    ctx.strokeStyle='#dfe5ee'; ctx.stroke(); ctx.restore();
+    const usable = bw*0.7;
+    ctx.save(); ctx.strokeStyle=C.d; ctx.lineWidth=2; ctx.setLineDash([4,3]);
+    ctx.beginPath(); ctx.moveTo(20+usable,my+8); ctx.lineTo(20+usable,my+46); ctx.stroke(); ctx.restore();
+    const used = bw*clamp(st.size/st.mem,0,1.15);
+    ctx.save(); rr(ctx,20,my+14,Math.min(used,bw),26,7);
+    ctx.fillStyle = m.fits? C.a : C.d; ctx.globalAlpha=.85; ctx.fill(); ctx.restore();
+    ptext(P,24,my+27,'모델 '+st.size+'MB','#fff','700 12px ui-monospace,Menlo,monospace');
+    ptext(P,20+usable+6,my+56,'안전 한계 (여유 메모리의 70%)',C.d,'11px system-ui,sans-serif',
+      usable>bw*0.6?'right':'left');
+
+    const win = !m.fits ? 'Cloud' : (m.dev < m.cloud ? 'On-device' : 'Cloud');
+    ptext(P,20,P.h-16,'지금 조건에서 유리한 쪽 → '+win, win==='On-device'?C.a:C.b,'700 13px system-ui,sans-serif');
+
+    setBar(0, m.fits? m.dev/1400*100 : 0, m.fits? Math.round(m.dev)+'ms' : '불가');
+    setBar(1, m.cloud/1400*100, Math.round(m.cloud)+'ms');
+    setBar(2, m.batt/50*100, F(m.batt,1)+'%/10분');
+
+    ro(el, [
+      ['모델 크기', st.size+' MB', C.a],
+      ['기기 여유', st.mem+' MB'],
+      ['기기 적재', m.fits? '가능' : '불가', m.fits?C.c:C.d],
+      ['네트워크 왕복', st.net+' ms', C.b],
+      ['On-device', m.fits? Math.round(m.dev)+' ms' : '—', C.a],
+      ['Cloud', Math.round(m.cloud)+' ms', C.b]
+    ]);
+  };
+
+  function sl(id,lbl,key){
+    const s=document.getElementById(id);
+    s.addEventListener('input',()=>{ st[key]=+s.value; document.getElementById(lbl).textContent=s.value; P.draw(); });
+  }
+  sl('sl-e-size','lb-e-size','size');
+  sl('sl-e-mem','lb-e-mem','mem');
+  sl('sl-e-net','lb-e-net','net');
+  P.draw();
+})();
+
+/* ══════════════════════════════════════════════
+   그림 8 — 라우팅 전략 비교
+   ══════════════════════════════════════════════ */
+(function(){
+  const P = mkPlot('cv-route', {range:4}); if(!P) return;
+  const el = document.getElementById('ro-route');
+  const st = {strategy:'rr', vari:0.85, rate:2.5, playing:false};
+  let rnd = lcg(20260807);
+  let q = [0,0,0], rr_i = 0, acc = 0, done = 0, waitSum = 0, maxQ = 0, lastSize = 0, raf=null, last=0, simT=0;
+
+  function reset(){
+    rnd = lcg(20260807);
+    q=[0,0,0]; rr_i=0; acc=0; done=0; waitSum=0; maxQ=0; lastSize=0; simT=0;
+    P.draw();
+  }
+
+  function step(dt){
+    simT += dt;
+    for(let i=0;i<3;i++) q[i] = Math.max(0, q[i]-dt);
+    acc += st.rate*dt;
+    while(acc >= 1){
+      acc -= 1;
+      const r = rnd();
+      const size = 0.10 + st.vari*r*r*2.6 + (1-st.vari)*0.55;
+      lastSize = size;
+      let idx;
+      if(st.strategy==='rr'){ idx = rr_i % 3; rr_i++; }
+      else { idx = q.indexOf(Math.min(q[0],q[1],q[2])); }
+      waitSum += q[idx]; done++;
+      q[idx] += size;
+      maxQ = Math.max(maxQ, q[idx]);
+    }
+  }
+
+  P.draw = function(){
+    P.clear();
+    const ctx = P.ctx;
+    ptext(P,20,22,'컨테이너별 밀린 작업량 (초)','#1b2432','700 13px system-ui,sans-serif');
+    ptext(P,P.w-20,22, st.strategy==='rr'? 'Round Robin' : 'Least Connections',
+      st.strategy==='rr'? C.b : C.c,'700 13px system-ui,sans-serif','right');
+
+    const top = 46, bottom = P.h-84, H = bottom-top;
+    const bw = Math.min(96, (P.w-80)/3), gap = (P.w-40-bw*3)/2;
+    const CAP = 8;
+    ctx.save(); ctx.strokeStyle='#e9eef6'; ctx.lineWidth=1;
+    for(let i=0;i<=4;i++){ const y=top+H*i/4; ctx.beginPath(); ctx.moveTo(20,y+.5); ctx.lineTo(P.w-20,y+.5); ctx.stroke(); }
+    ctx.restore();
+    ptext(P,P.w-22,top+4,CAP+'초 이상','#9aa5b5','11px ui-monospace,Menlo,monospace','right','top');
+
+    for(let i=0;i<3;i++){
+      const x = 20+i*(bw+gap);
+      const frac = clamp(q[i]/CAP,0,1);
+      const h = H*frac;
+      const col = frac>0.75? C.d : (frac>0.4? C.b : C.c);
+      ctx.save(); rr(ctx,x,top,bw,H,8); ctx.fillStyle='#f4f6fa'; ctx.fill();
+      ctx.strokeStyle='#dfe5ee'; ctx.lineWidth=1; ctx.stroke(); ctx.restore();
+      if(h>3){ ctx.save(); rr(ctx,x,bottom-h,bw,h,8); ctx.fillStyle=col; ctx.globalAlpha=.85; ctx.fill(); ctx.restore(); }
+      ptext(P,x+bw/2,bottom+18,'c'+(i+1),'#5a6675','600 13px ui-monospace,Menlo,monospace','center');
+      ptext(P,x+bw/2,bottom-h-12,F(q[i],1)+'s',col,'700 12px ui-monospace,Menlo,monospace','center');
+    }
+
+    const avg = done? waitSum/done : 0;
+    ptext(P,20,P.h-46,'평균 대기시간','#5a6675','12px system-ui,sans-serif');
+    ptext(P,20,P.h-26,F(avg,2)+'초', avg>3?C.d:(avg>1?C.b:C.c),'700 20px ui-monospace,Menlo,monospace');
+    ptext(P,P.w-20,P.h-46,'처리한 요청','#5a6675','12px system-ui,sans-serif','right');
+    ptext(P,P.w-20,P.h-26,String(done),'#0b1220','700 20px ui-monospace,Menlo,monospace','right');
+    ptext(P,P.w/2,P.h-26, st.playing? '재생 중' : '▶ 재생을 눌러 요청을 흘려보내세요','#8a94a3','12px system-ui,sans-serif','center');
+
+    ro(el, [
+      ['전략', st.strategy==='rr'?'Round Robin':'Least Conn', st.strategy==='rr'?C.b:C.c],
+      ['시뮬레이션 시간', F(simT,1)+'초'],
+      ['처리한 요청', String(done), C.a],
+      ['평균 대기', F(avg,2)+'초', avg>3?C.d:C.c],
+      ['가장 긴 큐', F(maxQ,1)+'초', C.d],
+      ['마지막 요청 크기', F(lastSize,2)+'초', C.b]
+    ]);
+  };
+
+  function tick(now){
+    if(!st.playing) return;
+    const dt = Math.min(0.12, (now-last)/1000); last = now;
+    step(dt*2.2);
+    P.draw();
+    raf = requestAnimationFrame(tick);
+  }
+  const bp = document.getElementById('btn-r-play');
+  bp.addEventListener('click', ()=>{
+    st.playing = !st.playing;
+    bp.classList.toggle('on', st.playing);
+    bp.textContent = st.playing? '⏸ 정지' : '▶ 재생';
+    if(st.playing){ last = performance.now(); raf = requestAnimationFrame(tick); }
+    else if(raf) cancelAnimationFrame(raf);
+  });
+  document.getElementById('btn-r-reset').addEventListener('click', reset);
+  const brr = document.getElementById('btn-r-rr'), blc = document.getElementById('btn-r-lc');
+  brr.addEventListener('click', ()=>{ st.strategy='rr'; brr.classList.add('on'); blc.classList.remove('on'); reset(); });
+  blc.addEventListener('click', ()=>{ st.strategy='lc'; blc.classList.add('on'); brr.classList.remove('on'); reset(); });
+  const sv = document.getElementById('sl-r-var'), sr = document.getElementById('sl-r-rate');
+  sv.addEventListener('input', ()=>{ st.vari=+sv.value; document.getElementById('lb-r-var').textContent=F(st.vari); reset(); });
+  sr.addEventListener('input', ()=>{ st.rate=+sr.value; document.getElementById('lb-r-rate').textContent=sr.value; reset(); });
+  P.draw();
+})();
+
+/* ══════════════════════════════════════════════
+   그림 9 — 모델 캐시 (LRU)
+   ══════════════════════════════════════════════ */
+(function(){
+  const P = mkPlot('cv-cache', {range:4}); if(!P) return;
+  const el = document.getElementById('ro-cache');
+  const NAMES = ['A','B','C','D','E','F'];
+  const COLD = 4.0;
+  let slots = 3, loaded = [], hits = 0, miss = 0, coldTotal = 0, log = [], lastEvicted = '—', flash = null;
+
+  function reset(){ loaded=[]; hits=0; miss=0; coldTotal=0; log=[]; lastEvicted='—'; flash=null; P.draw(); }
+
+  function request(n){
+    const i = loaded.indexOf(n);
+    if(i>=0){
+      loaded.splice(i,1); loaded.unshift(n);
+      hits++; flash={n, ok:true};
+      log.unshift('Model '+n+' → hit (즉시 응답)');
+    } else {
+      miss++; coldTotal += COLD; flash={n, ok:false};
+      let ev = null;
+      if(loaded.length >= slots){ ev = loaded.pop(); lastEvicted = ev; }
+      loaded.unshift(n);
+      log.unshift('Model '+n+' → miss · cold start '+COLD.toFixed(1)+'초'+(ev? ' · '+ev+' 언로드':''));
+    }
+    if(log.length>4) log.pop();
+    P.draw();
+  }
+
+  P.draw = function(){
+    P.clear();
+    const ctx = P.ctx;
+    ptext(P,20,22,'컨테이너 안 — 지금 메모리에 올라간 모델','#1b2432','700 13px system-ui,sans-serif');
+    ptext(P,P.w-20,22,'왼쪽일수록 최근 사용','#8a94a3','12px system-ui,sans-serif','right');
+
+    const top = 44, sh = 66;
+    const sw = Math.min(104, (P.w-40-(slots-1)*10)/slots);
+    for(let i=0;i<slots;i++){
+      const x = 20+i*(sw+10);
+      const n = loaded[i];
+      if(n){
+        const isFlash = flash && flash.n===n;
+        pbox(P,x,top,sw,sh,{title:'Model '+n, sub: i===slots-1? '다음 언로드 후보':'', color: isFlash? (flash.ok?C.c:C.b) : C.a, solid:isFlash});
+      } else {
+        pbox(P,x,top,sw,sh,{title:'(빈 슬롯)', color:'#c3ccda', off:true});
+      }
+    }
+
+    const ry = top+sh+34;
+    ptext(P,20,ry,'모델 저장소 (Model Repository)','#5a6675','12px system-ui,sans-serif');
+    const rw = Math.min(58, (P.w-40-5*8)/6);
+    NAMES.forEach((n,i)=>{
+      const x = 20+i*(rw+8);
+      const inMem = loaded.indexOf(n)>=0;
+      pbox(P,x,ry+12,rw,38,{title:n, color: inMem? '#c3ccda' : C.e, off:inMem, alpha:inMem?1:0.95});
+    });
+    ptext(P,20,ry+68,'회색 = 이미 메모리에 올라가 있음 · 보라 = 저장소에만 있음(요청 시 cold start)','#8a94a3','11.5px system-ui,sans-serif');
+
+    const ly = ry+92;
+    ptext(P,20,ly,'최근 이벤트','#5a6675','12px system-ui,sans-serif');
+    if(log.length===0) ptext(P,20,ly+22,'아직 요청이 없습니다 — 오른쪽 버튼을 눌러보세요','#a6b0be','12px system-ui,sans-serif');
+    log.forEach((L,i)=>{
+      const col = L.indexOf('hit')>=0 ? C.c : C.b;
+      ptext(P,20,ly+22+i*19,L, i===0? col : '#a6b0be', (i===0?'600 ':'')+'12px system-ui,sans-serif');
+    });
+
+    const total = hits+miss;
+    const rate = total? hits/total*100 : 0;
+    ro(el, [
+      ['슬롯 수', String(slots), C.a],
+      ['총 요청', String(total)],
+      ['hit', String(hits), C.c],
+      ['miss', String(miss), C.b],
+      ['hit rate', total? Math.round(rate)+'%' : '—', rate>=70?C.c:(rate>=40?C.b:C.d)],
+      ['누적 cold start', F(coldTotal,1)+'초', C.d],
+      ['마지막 언로드', lastEvicted, C.mut]
+    ]);
+  };
+
+  NAMES.forEach(n=>{
+    document.getElementById('btn-c-'+n).addEventListener('click', ()=>request(n));
+  });
+  document.getElementById('btn-c-reset').addEventListener('click', reset);
+  const ss = document.getElementById('sl-c-slot');
+  ss.addEventListener('input', ()=>{
+    slots = +ss.value;
+    document.getElementById('lb-c-slot').textContent = ss.value;
+    while(loaded.length>slots) loaded.pop();
+    P.draw();
+  });
+  P.draw();
+})();
+
+/* ══════════════════════════════════════════════
+   그림 10 — Graph Execution
+   ══════════════════════════════════════════════
+   순차 실행과 병렬 실행의 총 지연시간을 간트 차트로 비교 */
+(function(){
+  const P = mkPlot('cv-graph', {range:4}); if(!P) return;
+  const el = document.getElementById('ro-graph');
+  const st = {llm:900, ret:220, par:false, playing:false, t:0};
+  let raf=null, last=0;
+
+  function plan(){
+    const S = [
+      {n:'Intent Classification', ms:60,  col:C.a},
+      {n:'Embedding',             ms:90,  col:C.b},
+      {n:'Retrieval',             ms:st.ret, col:C.e},
+      {n:'LLM',                   ms:st.llm, col:C.c},
+      {n:'Safety Filter',         ms:70,  col:C.d}
+    ];
+    if(!st.par){
+      let t=0; S.forEach(s=>{ s.s=t; t+=s.ms; });
+      return {S, total:t};
+    }
+    S[0].s = 0;
+    S[1].s = S[0].ms;
+    S[2].s = S[0].ms;
+    const after = S[0].ms + Math.max(S[1].ms, S[2].ms);
+    S[3].s = after;
+    S[4].s = after + S[3].ms;
+    return {S, total: S[4].s + S[4].ms};
+  }
+
+  P.draw = function(){
+    P.clear();
+    const {S, total} = plan();
+    const seqTotal = 60+90+st.ret+st.llm+70;
+    const ctx = P.ctx;
+    const padL = 146, w = P.w-padL-24, top = 46, rh = 40;
+
+    ptext(P,20,22, st.par? '병렬 실행 — Embedding과 Retrieval이 겹칩니다' : '순차 실행 — 한 단계씩 차례로',
+      st.par?C.c:'#1b2432','700 13px system-ui,sans-serif');
+
+    const X = ms => padL + ms/total*w;
+    ctx.save(); ctx.strokeStyle='#eef2f8'; ctx.lineWidth=1;
+    for(let i=0;i<=4;i++){ const x=padL+w*i/4; ctx.beginPath(); ctx.moveTo(x+.5,top-6); ctx.lineTo(x+.5,top+5*rh); ctx.stroke(); }
+    ctx.restore();
+
+    S.forEach((s,i)=>{
+      const y = top+i*rh;
+      ptext(P,padL-10,y+13,s.n,'#0b1220','600 12px system-ui,sans-serif','right');
+      const x0 = X(s.s), bw = Math.max(3, X(s.s+s.ms)-x0);
+      ctx.save(); rr(ctx,x0,y+2,bw,22,5); ctx.fillStyle=s.col; ctx.globalAlpha=.88; ctx.fill(); ctx.restore();
+      if(bw>52) ptext(P,x0+bw/2,y+13,s.ms+'ms','#fff','700 11px ui-monospace,Menlo,monospace','center');
+      else if(x0+bw < P.w-58) ptext(P,x0+bw+6,y+13,s.ms+'ms',s.col,'600 11px ui-monospace,Menlo,monospace');
+      else ptext(P,x0-6,y+13,s.ms+'ms',s.col,'600 11px ui-monospace,Menlo,monospace','right');
+    });
+
+    for(let i=0;i<=4;i++){
+      const x = padL+w*i/4;
+      ptext(P,x,top+5*rh+14,Math.round(total*i/4)+'ms','#9aa5b5','11px ui-monospace,Menlo,monospace','center');
+    }
+
+    if(st.t>0){
+      const px = X(Math.min(st.t,total));
+      ctx.save(); ctx.strokeStyle=C.a; ctx.lineWidth=2;
+      ctx.beginPath(); ctx.moveTo(px,top-8); ctx.lineTo(px,top+5*rh+4); ctx.stroke();
+      ctx.fillStyle=C.a; ctx.beginPath(); ctx.arc(px,top-10,4,0,7); ctx.fill(); ctx.restore();
+    }
+
+    const by = top+5*rh+40;
+    const heaviest = S.reduce((a,b)=> b.ms>a.ms? b : a, S[0]);
+    ptext(P,20,by,'총 지연시간','#5a6675','12px system-ui,sans-serif');
+    ptext(P,20,by+22,Math.round(total)+' ms',C.c,'700 22px ui-monospace,Menlo,monospace');
+    ptext(P,P.w-20,by,'가장 무거운 단계','#5a6675','12px system-ui,sans-serif','right');
+    ptext(P,P.w-20,by+22,heaviest.n+' '+Math.round(heaviest.ms/total*100)+'%',heaviest.col,'700 14px system-ui,sans-serif','right');
+
+    ro(el, [
+      ['모드', st.par? '병렬' : '순차', st.par?C.c:C.a],
+      ['순차 총합', seqTotal+' ms'],
+      ['현재 총합', Math.round(total)+' ms', C.c],
+      ['절감', st.par? (seqTotal-total)+' ms' : '0 ms', st.par?C.c:C.mut],
+      ['최대 단계', heaviest.n, heaviest.col],
+      ['그 비중', Math.round(heaviest.ms/total*100)+'%', C.d]
+    ]);
+  };
+
+  function tick(now){
+    if(!st.playing) return;
+    const {total} = plan();
+    const dt = now-last; last = now;
+    st.t += dt * (total>2500 ? total/2500 : 1);
+    if(st.t>=total){ st.t=total; st.playing=false; document.getElementById('btn-g-play').classList.remove('on'); }
+    P.draw();
+    if(st.playing) raf = requestAnimationFrame(tick);
+  }
+  const bplay = document.getElementById('btn-g-play');
+  bplay.addEventListener('click', ()=>{
+    if(st.playing){ st.playing=false; bplay.classList.remove('on'); if(raf) cancelAnimationFrame(raf); return; }
+    st.t = 0; st.playing = true; bplay.classList.add('on');
+    last = performance.now(); raf = requestAnimationFrame(tick);
+  });
+  const bpar = document.getElementById('btn-g-par');
+  bpar.addEventListener('click', ()=>{ st.par=!st.par; bpar.classList.toggle('on', st.par); st.t=0; P.draw(); });
+  function sl(id,lbl,key){
+    const s=document.getElementById(id);
+    s.addEventListener('input',()=>{ st[key]=+s.value; document.getElementById(lbl).textContent=s.value; st.t=0; P.draw(); });
+  }
+  sl('sl-g-llm','lb-g-llm','llm');
+  sl('sl-g-ret','lb-g-ret','ret');
+  P.draw();
+})();
+
+/* ══════════════════════════════════════════════
+   그림 11 — 서빙 방식 고르기 (이 글의 규칙을 점수로 옮긴 것)
+   ══════════════════════════════════════════════ */
+(function(){
+  const P = mkPlot('cv-choose', {range:4}); if(!P) return;
+  const el = document.getElementById('ro-choose');
+  const setBar = makeBars(document.getElementById('ro-choose-bars'),
+    ['On-device','Single','Multi','Platform'], [C.a, C.c, C.b, C.e]);
+  const st = {size:7, count:3, rps:15, priv:20};
+
+  function score(){
+    const fit = clamp(100 - (st.size/3)*100, 0, 100);
+    let onDev = 0.55*st.priv + 0.45*fit;
+    if(st.count>20) onDev *= 0.55;
+    if(st.rps>60) onDev *= 0.8;
+
+    let single = 34 + Math.min(52, st.rps*0.85) - st.count*0.14 - (st.size>40?12:0) - st.priv*0.35;
+    let multi   = 18 + Math.min(58, st.count*0.55) + Math.max(0, 34 - st.rps*1.1) - (st.size>30?18:0) - st.priv*0.35;
+    let plat    = 12 + Math.min(42, st.count*0.28) + Math.min(24, st.rps*0.22) - st.priv*0.35;
+    if(st.count>10 && st.rps>4) plat += 20;
+
+    return [clamp(onDev,0,100), clamp(single,0,100), clamp(multi,0,100), clamp(plat,0,100)];
+  }
+
+  P.draw = function(){
+    P.clear();
+    const s = score();
+    const names = ['On-device','Single-model','Multi-model','Serving Platform'];
+    const cols = [C.a, C.c, C.b, C.e];
+    const notes = [
+      '기기 안에서 실행 · 오프라인 · 프라이버시',
+      '모델 1개 = 서비스 1개 · 최고 성능',
+      '컨테이너 1개에 여러 모델 · LRU 캐시',
+      'Graph Execution + Resource Group'
+    ];
+    const best = s.indexOf(Math.max.apply(null, s));
+    const ctx = P.ctx;
+
+    ptext(P,20,22,'조건에 대한 적합도 점수','#1b2432','700 13px system-ui,sans-serif');
+    ptext(P,P.w-20,22,'※ 이 글의 규칙을 옮긴 대략적인 점수입니다','#8a94a3','11.5px system-ui,sans-serif','right');
+
+    const top = 44, rh = 72;
+    for(let i=0;i<4;i++){
+      const y = top+i*rh;
+      const on = i===best;
+      ctx.save(); rr(ctx,20,y,P.w-40,58,10);
+      ctx.fillStyle = on ? 'rgba(37,99,235,.05)' : '#ffffff'; ctx.fill();
+      ctx.strokeStyle = on ? cols[i] : '#e4eaf3'; ctx.lineWidth = on?2:1; ctx.stroke(); ctx.restore();
+      ptext(P,34,y+20,names[i],'#0b1220',(on?'700 ':'600 ')+'14px system-ui,sans-serif');
+      ptext(P,34,y+40,notes[i],'#8a94a3','12px system-ui,sans-serif');
+      const bx = Math.max(P.w*0.52, 260), bwid = P.w-20-24-bx;
+      ctx.save(); rr(ctx,bx,y+38,bwid,12,6); ctx.fillStyle='#eef2f8'; ctx.fill(); ctx.restore();
+      ctx.save(); rr(ctx,bx,y+38,Math.max(4,bwid*s[i]/100),12,6); ctx.fillStyle=cols[i]; ctx.globalAlpha=on?1:.55; ctx.fill(); ctx.restore();
+      ptext(P,P.w-34,y+20,Math.round(s[i])+'점',cols[i],'700 15px ui-monospace,Menlo,monospace','right');
+      if(on) ptext(P,bx,y+20,'추천',cols[i],'700 12px system-ui,sans-serif');
+    }
+
+    for(let i=0;i<4;i++) setBar(i, s[i], Math.round(s[i])+'점');
+
+    ro(el, [
+      ['모델 크기', F(st.size,1)+'B', C.a],
+      ['모델 개수', String(st.count), C.b],
+      ['모델당 요청', st.rps+' /s', C.c],
+      ['프라이버시 요구', String(st.priv), C.d],
+      ['1순위', names[best], cols[best]],
+      ['점수', Math.round(s[best])+'점', cols[best]]
+    ]);
+  };
+
+  function sl(id,lbl,key,fmt){
+    const s=document.getElementById(id);
+    s.addEventListener('input',()=>{ st[key]=+s.value; document.getElementById(lbl).textContent=fmt?fmt(st[key]):s.value; P.draw(); });
+  }
+  sl('sl-ch-size','lb-ch-size','size', v=>F(v,1));
+  sl('sl-ch-count','lb-ch-count','count');
+  sl('sl-ch-rps','lb-ch-rps','rps');
+  sl('sl-ch-priv','lb-ch-priv','priv');
+  P.draw();
+})();
+
+
+/* 리사이즈 */
+let rt=null;
+window.addEventListener('resize',()=>{ clearTimeout(rt); rt=setTimeout(()=>REDRAW.forEach(f=>f()),120); });
+window.addEventListener('load',()=>REDRAW.forEach(f=>f()));
+
+/* ── 바깥 사이트(티스토리 등)의 고정 헤더 높이를 재서 내비게이션을 그만큼 내린다 ── */
+(function(){
+  const nav = document.querySelector('nav');
+  if(!nav) return;
+  let cur = -1;
+  function measure(){
+    const prev = nav.style.top;
+    nav.style.top = '0px';                 /* 재는 동안만 원위치로 */
+    let off = 0;
+    const xs = [Math.round(innerWidth*0.5), 12, innerWidth-12];
+    for(const x of xs){
+      let list = [];
+      try { list = document.elementsFromPoint(x, 2) || []; } catch(e){ list = []; }
+      for(const el of list){
+        if(el === nav || nav.contains(el) || el === document.documentElement || el === document.body) continue;
+        const pos = getComputedStyle(el).position;
+        if(pos !== 'fixed' && pos !== 'sticky') continue;
+        const b = el.getBoundingClientRect().bottom;
+        if(b > off && b < innerHeight*0.4) off = b;
+      }
+    }
+    nav.style.top = prev;
+    return Math.round(off);
+  }
+
+  /* 스킨 CSS가 어떤 선택자를 쓰든 이길 수 있는 유일한 방법 — 인라인 !important.
+     내비게이션이 흐름에서 빠지거나 투명해지는 사고를 여기서 원천 차단한다. */
+  function forceNav(loose, off){
+    const F = (el, k, v) => el && el.style.setProperty(k, v, 'important');
+    F(nav, 'position', loose ? 'static' : 'sticky');
+    F(nav, 'top',      loose ? 'auto'   : off + 'px');
+    F(nav, 'left', 'auto'); F(nav, 'right', 'auto'); F(nav, 'bottom', 'auto');
+    F(nav, 'display', 'block'); F(nav, 'float', 'none'); F(nav, 'clear', 'both');
+    F(nav, 'width', 'auto'); F(nav, 'max-width', 'none'); F(nav, 'height', 'auto');
+    F(nav, 'margin', '0'); F(nav, 'padding', '0'); F(nav, 'z-index', '60');
+    F(nav, 'background', '#fff'); F(nav, 'transform', 'none');
+    F(nav, 'opacity', '1'); F(nav, 'visibility', 'visible');
+    const inner = nav.querySelector('.inner');
+    if(inner){
+      F(inner, 'display', 'flex'); F(inner, 'flex-wrap', 'nowrap');
+      F(inner, 'overflow-x', 'auto'); F(inner, 'align-items', 'center');
+      F(inner, 'position', 'static'); F(inner, 'float', 'none'); F(inner, 'width', 'auto');
+      for(const c of inner.children){ F(c, 'flex', 'none'); F(c, 'float', 'none'); F(c, 'position', 'static'); }
+    }
+  }
+
+  function apply(){
+    const off = measure();
+    const h = nav.offsetHeight;
+    const key = off + ':' + h;
+    if(key === cur) return;
+    cur = key;
+    const root = document.documentElement;
+    root.style.setProperty('--topbar', off + 'px');
+    /* 앵커로 이동했을 때 제목이 내비게이션에 가리지 않도록 */
+    root.style.scrollPaddingTop = (off + h + 14) + 'px';
+  }
+  let t = null;
+  const later = function(){ clearTimeout(t); t = setTimeout(apply, 120); };
+  window.addEventListener('load', later);
+  window.addEventListener('resize', later);
+  window.addEventListener('scroll', later, {passive:true});
+  apply();
+})();
+
+/* ── embed-fit — 바깥 사이트(티스토리 등)의 고정 헤더를 재서 내비게이션을 그만큼 내린다.
+      헤더가 여러 겹(상단바 + 제목바)인 경우까지 잡고, 너무 두꺼우면 내비게이션을 아예 안 붙인다.
+      단독 파일로 열면 잰 값이 0이라 아무 영향이 없다. 위쪽 <style id="embed-fit">과 한 쌍. ── */
+(function(){
+  const nav = document.querySelector('nav');
+  if(!nav) return;
+  const root = document.documentElement, body = document.body;
+  let cur = null, raf = 0;
+
+  /* 화면 맨 위에 붙은 고정/스티키 헤더를 '한 겹씩 아래로' 따라가며 전체 두께를 잰다.
+     티스토리처럼 상단바 아래에 제목바가 한 겹 더 붙는 경우를 잡기 위해서다. */
+  function measure(){
+    const limit = Math.min(innerHeight * 0.4, 320);
+    const xs = [Math.round(innerWidth * 0.5), 14, innerWidth - 14];
+    let off = 0;
+    for(let pass = 0; pass < 4; pass++){
+      let best = off;
+      for(const dy of [2, 8]){
+        const y = off + dy;
+        if(y > limit) break;
+        for(const x of xs){
+          let list = [];
+          try { list = document.elementsFromPoint(x, y) || []; } catch(e){ list = []; }
+          for(const el of list){
+            if(el === nav || nav.contains(el) || el === root || el === body) continue;
+            const pos = getComputedStyle(el).position;
+            if(pos !== 'fixed' && pos !== 'sticky') continue;
+            const r = el.getBoundingClientRect();
+            /* 지금까지 잰 헤더 바로 아래에 이어 붙은 것만 다음 겹으로 인정한다 */
+            if(r.top <= off + 4 && r.bottom > best && r.bottom <= limit) best = r.bottom;
+          }
+        }
+      }
+      if(best <= off) break;
+      off = best;
+    }
+    return Math.round(off);
+  }
+
+
+  /* 스킨 CSS가 어떤 선택자를 쓰든 이길 수 있는 유일한 방법 — 인라인 !important.
+     내비게이션이 흐름에서 빠지거나 투명해지는 사고를 여기서 원천 차단한다. */
+  function forceNav(loose, off){
+    const F = (el, k, v) => el && el.style.setProperty(k, v, 'important');
+    F(nav, 'position', loose ? 'static' : 'sticky');
+    F(nav, 'top',      loose ? 'auto'   : off + 'px');
+    F(nav, 'left', 'auto'); F(nav, 'right', 'auto'); F(nav, 'bottom', 'auto');
+    F(nav, 'display', 'block'); F(nav, 'float', 'none'); F(nav, 'clear', 'both');
+    F(nav, 'width', 'auto'); F(nav, 'max-width', 'none'); F(nav, 'height', 'auto');
+    F(nav, 'margin', '0'); F(nav, 'padding', '0'); F(nav, 'z-index', '60');
+    F(nav, 'background', '#fff'); F(nav, 'transform', 'none');
+    F(nav, 'opacity', '1'); F(nav, 'visibility', 'visible');
+    const inner = nav.querySelector('.inner');
+    if(inner){
+      F(inner, 'display', 'flex'); F(inner, 'flex-wrap', 'nowrap');
+      F(inner, 'overflow-x', 'auto'); F(inner, 'align-items', 'center');
+      F(inner, 'position', 'static'); F(inner, 'float', 'none'); F(inner, 'width', 'auto');
+      for(const c of inner.children){ F(c, 'flex', 'none'); F(c, 'float', 'none'); F(c, 'position', 'static'); }
+    }
+  }
+
+  function apply(){
+    raf = 0;
+    const off = measure(), h = nav.offsetHeight;
+    /* 안전장치 — 바깥 헤더가 화면의 30%를 넘거나 내비게이션 자체가 25%를 넘으면 붙이지 않는다 */
+    /* 조상 중에 스티키를 깨는 요소(overflow/transform/filter/contain)가 있으면
+       붙이려다 엉뚱한 곳에 붙어 본문을 덮는다. 그럴 땐 아예 안 붙인다. */
+    let broken = false;
+    for(let p = nav.parentElement; p && p !== body; p = p.parentElement){
+      const c = getComputedStyle(p);
+      if(c.overflow !== 'visible' || c.transform !== 'none' || c.filter !== 'none' ||
+         c.contain !== 'none' || c.perspective !== 'none'){ broken = true; break; }
+    }
+    const loose = broken || (off > innerHeight * 0.30) || (h > innerHeight * 0.25);
+    const key = off + ':' + h + ':' + (loose ? 1 : 0);
+    if(key === cur) return;
+    cur = key;
+    body.classList.toggle('embed-loose', loose);
+    const doc = document.querySelector('.llmso-doc');
+    if(doc) doc.classList.toggle('embed-loose-doc', loose);
+    forceNav(loose, off);
+    root.style.setProperty('--topbar', off + 'px');
+    root.style.scrollPaddingTop = (loose ? off + 14 : off + h + 14) + 'px';
+  }
+  const later = function(){ if(!raf) raf = requestAnimationFrame(apply); };
+  window.addEventListener('load', later);
+  window.addEventListener('resize', later);
+  window.addEventListener('scroll', later, {passive:true});
+  if(document.fonts && document.fonts.ready) document.fonts.ready.then(later);
+  setTimeout(later, 300); setTimeout(later, 1200);
+  apply();
+})();
+</script>
+
+</div>
+<div id="lsx-foot"><div class="lsx-row"><a href="00b-math-foundations.html"><div class="k">← 이전</div><div class="v">트랜스포머를 위한 최소한의 수학</div></a><a class="nxt" href="02-llm-serving.html"><div class="k">다음 →</div><div class="v">CH2 LLM 서빙</div></a></div>
+<div class="toc"><a href="index.html">전체 목차로</a></div></div><script id="lsx-js">
+(function(){
+ var b=document.getElementById('lsx-prog');
+ function up(){var h=document.documentElement,d=(h.scrollHeight-h.clientHeight);
+  b.style.width=(d>0?(h.scrollTop/d*100):0)+'%';}
+ addEventListener('scroll',up,{passive:true}); addEventListener('resize',up); up();
+ var P="00b-math-foundations.html",N="02-llm-serving.html";
+ addEventListener('keydown',function(e){
+  var t=e.target,tag=(t&&t.tagName||'').toLowerCase();
+  if(tag==='input'||tag==='textarea'||tag==='select'||(t&&t.isContentEditable))return;
+  if(e.metaKey||e.ctrlKey||e.altKey)return;
+  if(e.key==='ArrowLeft'&&P)location.href=P;
+  if(e.key==='ArrowRight'&&N)location.href=N;
+ });
+ var K='llmso:'+"01-model-serving-intro";
+ try{var s=localStorage.getItem(K); if(s&&+s>200) setTimeout(function(){scrollTo(0,+s)},60);}catch(e){}
+ var tm; addEventListener('scroll',function(){clearTimeout(tm);tm=setTimeout(function(){
+   try{localStorage.setItem(K,String(scrollY));localStorage.setItem('llmso:last',"01-model-serving-intro");}catch(e){}
+ },400)},{passive:true});
+})();
+</script><script id="lsx-mobile-js">
+(function(){
+ function setup(){
+  document.querySelectorAll('#llmso-doc .canvas-wrap').forEach(function(w){
+   if(w.parentNode&&w.parentNode.classList.contains('lsx-fig'))return;
+   if(w.scrollWidth<=w.clientWidth+4)return;
+   var o=document.createElement('div'); o.className='lsx-fig';
+   w.parentNode.insertBefore(o,w); o.appendChild(w);
+   var h=document.createElement('div'); h.className='lsx-hint';
+   h.textContent='옆으로 밀어보세요 →'; o.appendChild(h);
+   function up(){
+     var end=w.scrollLeft+w.clientWidth>=w.scrollWidth-4;
+     o.classList.toggle('at-end',end);
+     if(w.scrollLeft>6)o.classList.add('touched');
+   }
+   w.addEventListener('scroll',up,{passive:true}); up();
+  });
+ }
+ function boot(){ setup(); setTimeout(setup,700); setTimeout(setup,2000); }
+ if(document.readyState==='complete')boot();
+ else addEventListener('load',boot);
+ var t; addEventListener('resize',function(){clearTimeout(t);t=setTimeout(setup,250)});
+})();
+</script><script id="lsx-study-js">
+(function(){
+ var TERMS=["Horizontal Pod Autoscaler", "--gpu-memory-utilization", "Service Level Agreement", "Triton Inference Server", "--tensor-parallel-size", "Neural Processing Unit", "Time Per Output Token", "Model Execution Code", "Single-model Service", "Time To First Token", "Continuous Batching", "Least Response Time", "Multi-Model Service", "Least Recently Used", "Model Architecture", "Tensor Parallelism", "Horizontal Scaling", "Inference Backend", "Least Connections", "Managed Endpoint", "Cost per request", "Model Management", "Vertical Scaling", "GPU Utilization", "Graph Execution", "Radix Attention", "Vendor lock-in", "PagedAttention", "--max-num-seqs", "InfiniBand(IB)", "Model swapping", "Resource Group", "Out Of Memory", "Model Runtime", "Model Wrapper", "Scale-to-zero", "Arrival rate", "Service rate", "Tail latency", "Edge Serving", "safetensors", "Autoscaling", "Round Robin", "Bin Packing", "On-premises", "Model Data", "state_dict", "Deployment", "Throughput", "Retraining", "Saturation", "API Server", "Cold start", "AI Gateway", "Inference", "Benchmark", "Streaming", "Queue (큐)", "On-Device", "Scale Out", "Route map", "Ray Serve", "Bias (편향", "Training", "Endpoint", "KV Cache", "Delegate", "Scale Up", "Workflow", "Serving", "Latency", "Routing", "Convert", "Replica", "Gateway", "Weight", "Tensor", "오토스케일링", "NVLink", "RoCEv2", "Unload", "콜드 스타트", "그래프 실행", "리소스 그룹", "KServe", "MLflow", "SGLang", "Token", "엔드포인트", "동적 배칭", "dtype", "워크플로우", "Quota", "온프레미스", "인퍼런스", "가중치)", "Loss", "벤치마크", "지연시간", "gRPC", "TTFT", "TPOT", "스트리밍", "vLLM", "fp16", "bf16", "Load", "처리량", "재학습", "라우팅", "SLA", "대기열", "도착률", "처리율", "p99", "fp8", "OOM", "NPU", "HPA", "LRU", "복제본", "텐서", "학습", "손실", "배포", "서빙", "포화", "변환", "쿼터"], DEFS={"Horizontal Pod Autoscaler": "Kubernetes에서 지표를 보고 컨테이너 수를 자동 조절하는 장치.", "--gpu-memory-utilization": "GPU 메모리를 몇 %까지 쓸 것인가. 높이면 KV Cache 공간이 늘어 더 많은 요청을 담지만, 너무 높이면 터집니다.", "Service Level Agreement": "\"응답의 99%는 2초 안에\" 같은 지켜야 할 약속. 못 지키면 계약·신뢰 문제가 됩니다.", "Triton Inference Server": "NVIDIA의 대표적인 멀티 모델 추론 백엔드. TensorFlow·ONNX·PyTorch 모델을 한 곳에서 다룹니다.", "--tensor-parallel-size": "모델 하나를 GPU 여러 장에 쪼개 나눠 싣는 것. 혼자서는 안 들어가는 큰 모델을 올릴 때 씁니다.", "Neural Processing Unit": "AI 계산 전용 칩. 아이폰의 Neural Engine, 안드로이드의 Snapdragon 계열 등 기기마다 다릅니다.", "Time Per Output Token": "토큰 하나를 더 뱉는 데 걸리는 시간. 글자가 흘러나오는 속도를 정합니다.", "Model Execution Code": "설계도대로 모델을 조립하고, 숫자를 채워 넣고, 실제로 돌리는 코드. 우리가 직접 쓰는 부분입니다.", "Single-model Service": "모델 하나(또는 모델 버전 하나)를 독립된 웹 서비스로 배포하는 방식.", "Time To First Token": "요청을 보낸 뒤 첫 글자가 화면에 뜨기까지의 시간. 사용자가 \"반응이 있다\"고 느끼는 순간입니다.", "Continuous Batching": "먼저 온 요청들이 다 끝날 때까지 기다리지 않고, 끝난 자리에 새 요청을 바로 끼워 넣는 방식.", "Least Response Time": "최근에 가장 빨리 답한 서버로 보내는 방식.", "Multi-Model Service": "서빙 컨테이너 하나가 여러 모델을 함께 호스팅하고 GPU·CPU·메모리를 나눠 쓰는 방식.", "Least Recently Used": "자리가 부족하면 가장 오랫동안 안 쓰인 것부터 내보내는 규칙.", "Model Architecture": "모델 내부의 설계도. layer가 몇 개고 어떤 종류이며 어떤 순서로 연결되는지. 숫자는 안 들어 있고 구조만 들어 있습니다.", "Tensor Parallelism": "모델 하나를 GPU 여러 장에 쪼개 나눠 싣는 것. 혼자서는 안 들어가는 큰 모델을 올릴 때 씁니다.", "Horizontal Scaling": "같은 컨테이너를 여러 대로 늘리는 것. 옆으로 키웁니다.", "Inference Backend": "서빙 컨테이너 안의 세 부품. 각각 외부에 노출 / 모델 파일 관리 / 실제 실행을 맡습니다.", "Least Connections": "지금 처리 중인 요청이 가장 적은 서버로 보내는 방식.", "Managed Endpoint": "클라우드가 서버·확장·모니터링을 대신 관리해 주는 모델 주소. SageMaker Inference Endpoint 같은 것.", "Cost per request": "요청 1건을 처리하는 데 드는 돈. 서빙의 성적표 중 가장 냉정한 숫자입니다.", "Model Management": "서빙 컨테이너 안의 세 부품. 각각 외부에 노출 / 모델 파일 관리 / 실제 실행을 맡습니다.", "Vertical Scaling": "더 큰 GPU를 쓰거나 여러 GPU에 모델을 쪼개는 것. 위로 키웁니다.", "GPU Utilization": "비싼 GPU가 실제로 일한 시간의 비율. 낮으면 돈을 태우면서 놀리고 있는 겁니다.", "Graph Execution": "여러 모델 호출을 정해진 순서와 갈래대로 실행하는 것. 순서도를 그대로 돌린다고 보면 됩니다.", "Radix Attention": "여러 요청이 공통으로 쓰는 프롬프트 앞부분을 나눠 쓰게 하는 기법. SGLang이라는 엔진에서 씁니다. 발상은 6장의 PagedAttention과 같은 계열입니다 — 같은 걸 두 번 계산하지 말자.", "Vendor lock-in": "특정 업체 기술에 너무 묶여서 나중에 옮기기 어려워지는 상태.", "PagedAttention": "KV Cache를 작은 조각(page)으로 쪼개서 관리하는 기법. 빈 공간 낭비를 크게 줄입니다. vLLM에서 기본으로 켜져 있습니다.", "--max-num-seqs": "동시에 처리할 요청(sequence) 최대 개수. 사실상 batch size입니다.", "InfiniBand(IB)": "각각 같은 기계 안 GPU끼리, 기계와 기계 사이를 잇는 통신 방식. 속도 차이가 큽니다.", "Model swapping": "자리를 만들려고 기존 모델을 내리고 새 모델을 올리는 것. 잦으면 그것만 하다 끝납니다.", "Resource Group": "앱·비즈니스별로 CPU·GPU·메모리 몫을 갈라 놓은 칸. 한 앱이 다 써버리는 걸 막습니다.", "Out Of Memory": "메모리가 모자라서 프로세스가 죽는 것. 서빙에서 제일 자주 만나는 사고입니다.", "Model Runtime": "기기와 OS가 제각각이어도 모델이 돌아가게 가운데서 맞춰주는 소프트웨어 층. LiteRT, ONNX Runtime(ORT), Core ML 등이 있습니다.", "Model Wrapper": "개발자가 직접 만드는 층. 입력 전처리 → 모델 로딩 → 실행 → 출력 후처리를 감싸서, 앱은 한 줄로 모델을 부르게 됩니다.", "Scale-to-zero": "요청이 없으면 인스턴스를 0개까지 줄이는 기능. 안 쓰는 동안 돈이 안 나갑니다. 대신 첫 요청에 cold start가 붙습니다.", "Arrival rate": "1초에 몇 건이 들어오는가. 손님이 오는 속도입니다.", "Service rate": "1초에 몇 건을 처리할 수 있는가. 계산대의 속도입니다.", "Tail latency": "느린 쪽 상위 1%가 겪은 지연시간. 평균은 멀쩡한데 일부 사용자만 30초 기다리는 상황을 잡아냅니다.", "Edge Serving": "모델을 서버가 아니라 사용자 기기(스마트폰·드론·카메라·로봇) 안에서 직접 실행하는 방식.", "safetensors": "weight를 저장하는 최신 표준 파일 형식. 예전 .bin(pickle 기반)과 달리 불러올 때 임의 코드가 실행될 위험이 없고, 로딩도 더 빠릅니다.", "Autoscaling": "트래픽이 늘면 서버 대수를 자동으로 늘리고 줄면 다시 줄이는 기능.", "Round Robin": "요청을 순서대로 돌아가며 서버에 나눠주는 가장 단순한 방식. c1 → c2 → c3 → c1 …", "Bin Packing": "남는 공간이 없게 차곡차곡 채워 배치하는 스케줄링 전략. 상자에 짐을 빈틈없이 담는 그림을 떠올리면 됩니다.", "On-premises": "클라우드가 아니라 회사가 직접 소유한 서버실에서 돌리는 것.", "Model Data": "학습으로 얻어낸 숫자 덩어리와 설정값. weight, bias, embedding, 클래스 목록, 입출력 tensor 정의 같은 것들이 여기 들어갑니다.", "state_dict": "PyTorch에서 weight와 bias만 모아둔 사전(dictionary). \"레이어 이름 → 숫자 뭉치\" 형태입니다.", "Deployment": "모델을 버전이 붙은 소프트웨어 산출물로 포장하는 단계. 컨테이너 이미지로 만드는 작업이 여기 속합니다.", "Throughput": "일정 시간에 처리한 요청 수. 서버가 얼마나 많이 감당하는지를 나타냅니다.", "Retraining": "운영하면서 쌓인 실제 데이터를 다시 학습에 넣는 것. 생명주기가 \"주기\"인 이유입니다.", "Saturation": "도착률이 처리율을 넘어 줄이 영원히 줄지 않는 상태. 여기 들어가면 지연시간은 시간이 갈수록 계속 커집니다.", "API Server": "서빙 컨테이너 안의 세 부품. 각각 외부에 노출 / 모델 파일 관리 / 실제 실행을 맡습니다.", "Cold start": "메모리에 없는 모델이 요청받아서 다운로드·로딩을 기다리는 시간. 몇 초에서 몇십 초까지 갑니다.", "AI Gateway": "모델 라우팅·인증·한도 관리를 맡는 앞단 관문 제품군. Envoy AI Gateway, LiteLLM 등이 있습니다.", "Inference": "학습이 끝난 모델에 입력을 넣어 답을 하나 뽑아내는 것. 우리가 흔히 \"모델을 돌린다\"고 말하는 그 동작입니다.", "Benchmark": "여러 모델을 같은 시험지로 채점해 비교하는 표준 문제 모음.", "Streaming": "다 만든 뒤 한 번에 주지 않고, 만들어지는 대로 조금씩 흘려보내는 방식.", "Queue (큐)": "처리되기를 기다리는 요청들이 서 있는 줄.", "On-Device": "모델을 서버가 아니라 사용자 기기(스마트폰·드론·카메라·로봇) 안에서 직접 실행하는 방식.", "Scale Out": "같은 컨테이너를 여러 대로 늘리는 것. 옆으로 키웁니다.", "Route map": "\"어느 모델이 어느 컨테이너에 올라가 있는지\"를 적어둔 표.", "Ray Serve": "Ray 기반 서빙. 다단계 추론 그래프를 짜는 데 강합니다.", "Bias (편향": "모델이 학습하면서 조금씩 고쳐 나간 그냥 숫자들입니다. weight는 \"입력을 얼마나 크게 반영할지\", bias는 \"결과를 얼마나 밀어 올릴지\"를 정합니다.", "Training": "데이터를 보여주면서 weight 숫자를 조금씩 고쳐 나가는 단계. 1장의 슬라이더를 자동으로 돌리는 일입니다.", "Endpoint": "모델을 부를 수 있는 주소. POST /v1/chat/completions 같은 것.", "KV Cache": "이미 계산한 중간 결과를 메모장에 적어두고 다시 안 계산하는 장치. 이름만 기억해 두세요. 6장에서 다시 나옵니다.", "Delegate": "계산의 일부를 GPU나 NPU 같은 전용 하드웨어에 넘기는 기능.", "Scale Up": "더 큰 GPU를 쓰거나 여러 GPU에 모델을 쪼개는 것. 위로 키웁니다.", "Workflow": "\"이 요청은 이 순서로 처리한다\"고 미리 정의해 둔 절차. Airflow, Ray 같은 도구로 만듭니다.", "Serving": "포장된 모델이 실제 요청을 받아 예측을 돌려주는 운영 단계. 이 글의 주제입니다.", "Latency": "요청 하나가 답을 받기까지 걸린 시간. 사용자가 체감하는 \"느림\"입니다.", "Routing": "들어온 요청을 어느 서버로 보낼지 정하는 일. 8장에서 자세히 다룹니다.", "Convert": "학습용 형식을 기기용 형식으로 바꾸는 것. 예: PyTorch ResNet → .tflite", "Replica": "한 모델을 몇 개 컨테이너에 올려둘지. 인기 모델은 이 수를 늘립니다.", "Gateway": "외부 요청이 맨 처음 들어오는 문. 인증·한도 확인이 여기서 이뤄집니다.", "Weight": "모델이 학습하면서 조금씩 고쳐 나간 그냥 숫자들입니다. weight는 \"입력을 얼마나 크게 반영할지\", bias는 \"결과를 얼마나 밀어 올릴지\"를 정합니다.", "Tensor": "숫자를 여러 겹으로 쌓아놓은 상자. 숫자 한 줄이면 1차원, 표 모양이면 2차원 — 그 이상도 됩니다. 모델이 주고받는 데이터의 기본 단위입니다.", "오토스케일링": "트래픽이 늘면 서버 대수를 자동으로 늘리고 줄면 다시 줄이는 기능.", "NVLink": "각각 같은 기계 안 GPU끼리, 기계와 기계 사이를 잇는 통신 방식. 속도 차이가 큽니다.", "RoCEv2": "각각 같은 기계 안 GPU끼리, 기계와 기계 사이를 잇는 통신 방식. 속도 차이가 큽니다.", "Unload": "모델을 메모리에 올리기 / 내리기.", "콜드 스타트": "메모리에 없는 모델이 요청받아서 다운로드·로딩을 기다리는 시간. 몇 초에서 몇십 초까지 갑니다.", "그래프 실행": "여러 모델 호출을 정해진 순서와 갈래대로 실행하는 것. 순서도를 그대로 돌린다고 보면 됩니다.", "리소스 그룹": "앱·비즈니스별로 CPU·GPU·메모리 몫을 갈라 놓은 칸. 한 앱이 다 써버리는 걸 막습니다.", "KServe": "Kubernetes 네이티브 서빙 플랫폼(구 KFServing). autoscaling(scale-to-zero 포함)과 멀티 프레임워크를 지원합니다.", "MLflow": "모델 레지스트리·실험 추적과 서빙을 함께 관리하는 도구.", "SGLang": "vLLM과 함께 자주 비교되는 또 다른 LLM serving engine.", "Token": "LLM이 글을 다루는 최소 단위. 대략 단어 조각 하나라고 생각하면 됩니다. 한국어는 보통 한 글자에 1~2 토큰입니다.", "엔드포인트": "모델을 부를 수 있는 주소. POST /v1/chat/completions 같은 것.", "동적 배칭": "먼저 온 요청들이 다 끝날 때까지 기다리지 않고, 끝난 자리에 새 요청을 바로 끼워 넣는 방식.", "dtype": "숫자 하나를 몇 비트로 표현할지. 비트가 적을수록 메모리를 덜 쓰고 빨라지지만, 정밀도를 조금 잃습니다.", "워크플로우": "\"이 요청은 이 순서로 처리한다\"고 미리 정의해 둔 절차. Airflow, Ray 같은 도구로 만듭니다.", "Quota": "그 칸에 배정된 한도.", "온프레미스": "클라우드가 아니라 회사가 직접 소유한 서버실에서 돌리는 것.", "인퍼런스": "학습이 끝난 모델에 입력을 넣어 답을 하나 뽑아내는 것. 우리가 흔히 \"모델을 돌린다\"고 말하는 그 동작입니다.", "가중치)": "모델이 학습하면서 조금씩 고쳐 나간 그냥 숫자들입니다. weight는 \"입력을 얼마나 크게 반영할지\", bias는 \"결과를 얼마나 밀어 올릴지\"를 정합니다.", "Loss": "모델의 답이 정답에서 얼마나 빗나갔는지를 나타내는 하나의 숫자. 작을수록 좋습니다.", "벤치마크": "여러 모델을 같은 시험지로 채점해 비교하는 표준 문제 모음.", "지연시간": "요청 하나가 답을 받기까지 걸린 시간. 사용자가 체감하는 \"느림\"입니다.", "gRPC": "HTTP 대신 쓰는 더 빠른 통신 규약. 내부 서비스끼리 부를 때 자주 씁니다.", "TTFT": "요청을 보낸 뒤 첫 글자가 화면에 뜨기까지의 시간. 사용자가 \"반응이 있다\"고 느끼는 순간입니다.", "TPOT": "토큰 하나를 더 뱉는 데 걸리는 시간. 글자가 흘러나오는 속도를 정합니다.", "스트리밍": "다 만든 뒤 한 번에 주지 않고, 만들어지는 대로 조금씩 흘려보내는 방식.", "vLLM": "LLM 전용 추론·서빙 엔진. \"높은 throughput과 메모리 효율\"을 목표로 만들어진 오픈소스입니다.", "fp16": "숫자 하나를 몇 비트로 표현할지. 비트가 적을수록 메모리를 덜 쓰고 빨라지지만, 정밀도를 조금 잃습니다.", "bf16": "숫자 하나를 몇 비트로 표현할지. 비트가 적을수록 메모리를 덜 쓰고 빨라지지만, 정밀도를 조금 잃습니다.", "Load": "모델을 메모리에 올리기 / 내리기.", "처리량": "일정 시간에 처리한 요청 수. 서버가 얼마나 많이 감당하는지를 나타냅니다.", "재학습": "운영하면서 쌓인 실제 데이터를 다시 학습에 넣는 것. 생명주기가 \"주기\"인 이유입니다.", "라우팅": "들어온 요청을 어느 서버로 보낼지 정하는 일. 8장에서 자세히 다룹니다.", "SLA": "\"응답의 99%는 2초 안에\" 같은 지켜야 할 약속. 못 지키면 계약·신뢰 문제가 됩니다.", "대기열": "처리되기를 기다리는 요청들이 서 있는 줄.", "도착률": "1초에 몇 건이 들어오는가. 손님이 오는 속도입니다.", "처리율": "1초에 몇 건을 처리할 수 있는가. 계산대의 속도입니다.", "p99": "느린 쪽 상위 1%가 겪은 지연시간. 평균은 멀쩡한데 일부 사용자만 30초 기다리는 상황을 잡아냅니다.", "fp8": "숫자 하나를 몇 비트로 표현할지. 비트가 적을수록 메모리를 덜 쓰고 빨라지지만, 정밀도를 조금 잃습니다.", "OOM": "메모리가 모자라서 프로세스가 죽는 것. 서빙에서 제일 자주 만나는 사고입니다.", "NPU": "AI 계산 전용 칩. 아이폰의 Neural Engine, 안드로이드의 Snapdragon 계열 등 기기마다 다릅니다.", "HPA": "Kubernetes에서 지표를 보고 컨테이너 수를 자동 조절하는 장치.", "LRU": "자리가 부족하면 가장 오랫동안 안 쓰인 것부터 내보내는 규칙.", "복제본": "한 모델을 몇 개 컨테이너에 올려둘지. 인기 모델은 이 수를 늘립니다.", "텐서": "숫자를 여러 겹으로 쌓아놓은 상자. 숫자 한 줄이면 1차원, 표 모양이면 2차원 — 그 이상도 됩니다. 모델이 주고받는 데이터의 기본 단위입니다.", "학습": "데이터를 보여주면서 weight 숫자를 조금씩 고쳐 나가는 단계. 1장의 슬라이더를 자동으로 돌리는 일입니다.", "손실": "모델의 답이 정답에서 얼마나 빗나갔는지를 나타내는 하나의 숫자. 작을수록 좋습니다.", "배포": "모델을 버전이 붙은 소프트웨어 산출물로 포장하는 단계. 컨테이너 이미지로 만드는 작업이 여기 속합니다.", "서빙": "포장된 모델이 실제 요청을 받아 예측을 돌려주는 운영 단계. 이 글의 주제입니다.", "포화": "도착률이 처리율을 넘어 줄이 영원히 줄지 않는 상태. 여기 들어가면 지연시간은 시간이 갈수록 계속 커집니다.", "변환": "학습용 형식을 기기용 형식으로 바꾸는 것. 예: PyTorch ResNet → .tflite", "쿼터": "그 칸에 배정된 한도."}, QUIZ=[{"q": "'모델'을 실행 가능한 소프트웨어로 만드는 세 덩어리는?", "o": ["가중치 · 학습 데이터 · 로그", "model data · model architecture · model execution code", "토크나이저 · 임베딩 · 디코더", "CPU · GPU · 메모리"], "a": 1, "e": "가중치(model data)만 있으면 숫자 뭉치일 뿐이고, 구조(architecture)를 알아야 어떻게 연결할지 알며, 실행 코드가 있어야 실제로 계산이 돕니다. 서빙 사고의 대부분이 '파일 하나 올리면 되는 것 아닌가'에서 출발해 실패합니다."}, {"q": "학습과 서빙의 가장 큰 차이는?", "o": ["쓰는 모델이 다르다", "같은 모델을 다루지만 신경 쓰는 지표가 완전히 다르다", "서빙에는 GPU가 필요 없다", "학습에는 데이터가 필요 없다"], "a": 1, "e": "학습은 정확도와 수렴 속도를 보고, 배치를 크게 잡아 처리량만 챙기면 됩니다. 서빙은 개별 요청의 지연(TTFT·ITL), 전체 처리량, 그리고 비용을 동시에 봐야 하며 이 셋은 서로 맞바꾸는 관계입니다."}, {"q": "데모에서 잘 돌던 시스템이 실제 유저 앞에서 무너지는 주된 이유는?", "o": ["모델 정확도가 떨어져서", "대기줄이 쌓이는 속도 때문에", "네트워크 지연 때문에", "디스크가 느려서"], "a": 1, "e": "대기열은 부하에 선형으로 반응하지 않습니다. 처리 속도에 근접할수록 대기 시간이 급격히 치솟습니다(대기열 이론의 절벽). 그래서 평균 부하 기준으로 용량을 잡으면 피크에서 무너집니다."}, {"q": "서빙 방식 네 가지(On-Device / Single-model / Multi-Model / Platform)의 관계는?", "o": ["뒤로 갈수록 항상 더 좋다", "우열이 아니라 조건이다. 조건이 바뀌면 답도 바뀐다", "앞의 것이 항상 더 싸다", "기술 발전 순서다"], "a": 1, "e": "모델 하나에 트래픽이 몰리면 Single-model이 최고 성능이고, 모델이 수백 개면 Multi-Model이 유일한 선택입니다. 지연과 프라이버시가 절대적이면 On-Device입니다. 조건이 답을 정합니다."}, {"q": "Single-model Service의 특징은?", "o": ["가장 복잡하지만 가장 유연하다", "가장 단순하고 성능이 가장 좋다. 대신 모델이 많아지면 감당이 안 된다", "모델을 요청 때만 올렸다 내린다", "여러 모델을 순서대로 거친다"], "a": 1, "e": "모델이 GPU에 상주하고 요청이 바로 처리되므로 로딩 지연이 없고 구조가 단순합니다. 대신 모델 하나마다 GPU를 점유하므로 모델 수가 늘면 비용이 선형으로 증가합니다."}, {"q": "Multi-Model Service의 핵심 동작은?", "o": ["모든 모델을 항상 GPU에 올려둔다", "요청이 올 때만 모델을 올렸다 내린다", "모델을 하나로 합친다", "모델을 클라이언트로 보낸다"], "a": 1, "e": "모든 모델을 상주시킬 GPU가 없을 때 씁니다. 요청이 오면 필요한 모델을 올리고, 메모리가 부족하면 오래된 것을 내립니다. 그래서 LRU 캐시 정책과 히트율이 성능을 결정합니다."}, {"q": "모델 서빙을 한 문장으로 정의하면?", "o": ["모델을 학습시키는 것", "요청을 받고 모델을 돌리고 결과를 돌려주는 것 — 다만 그 사이에 신경 쓸 게 아주 많다", "모델 파일을 저장·배포하는 것", "모델의 정확도를 평가하는 것"], "a": 1, "e": "정의 자체는 단순합니다. 그 '사이'에 배칭·스케줄링·KV 캐시 관리·스트리밍·오토스케일이 전부 들어갑니다. 이 강의 전체가 그 '사이'에 대한 이야기입니다."}, {"q": "학습자료가 든 vLLM 사례에서 설정 두 개만 바꿔 얻은 성능 차이는?", "o": ["약 1.5배", "약 15배", "약 2배", "유의미한 차이 없음"], "a": 1, "e": "같은 GPU, 같은 모델입니다. 어떤 설정이 왜 그런 차이를 만드는지 아는 것이 이 과정의 목표이고, 그래서 클라우드 관리형 서비스를 쓰더라도 원리를 알아야 합니다."}, {"q": "On-Device Serving의 정의는?", "o": ["엣지 서버(리전 근처)에서 돌리는 것", "모델을 사용자의 폰·드론·카메라 안에서 직접 돌리는 것", "CDN에 응답을 캐시하는 것", "브라우저에서 API를 호출하는 것"], "a": 1, "e": "네트워크 왕복이 없어 지연이 극히 낮고 데이터가 기기를 떠나지 않습니다. 대신 모델 크기·전력·발열 제약이 크고, 업데이트 배포가 어렵습니다."}, {"q": "Model Serving Platform이 필요해지는 상황은?", "o": ["모델이 하나일 때", "요청 하나가 모델 여러 개를 순서대로 거쳐야 할 때", "GPU가 한 장일 때", "트래픽이 적을 때"], "a": 1, "e": "모델 간 호출 순서·재시도·부분 실패 처리를 관리하는 층이 따로 필요해집니다. CH4의 에이전트 워크플로우가 정확히 이 사례입니다."}, {"q": "Multi-Model Service가 치르는 대가는?", "o": ["대가가 없다", "모델을 올렸다 내리는 과정에서 로딩 지연이 생긴다", "정확도가 떨어진다", "GPU를 항상 더 많이 쓴다"], "a": 1, "e": "모든 모델을 상주시키지 않는 대신, 캐시 미스 시 디스크→GPU 로딩 시간을 치릅니다. 디스크는 GPU 메모리보다 수천 배 느리므로 이 미스가 곧 지연입니다. LRU 캐시로 미스를 줄입니다."}, {"q": "네 가지 서빙 방식을 고를 때의 사고방식은?", "o": ["뒤로 갈수록 발전된 방식이니 최신을 고른다", "우열이 아니라 조건 — 모델 수·트래픽 패턴·지연 요구가 답을 정한다", "가장 싼 것을 고른다", "팀이 익숙한 것을 고른다"], "a": 1, "e": "모델 하나에 트래픽이 몰리면 Single-model이 최고 성능입니다. 모델이 수백 개면 Multi-Model이 유일한 선택입니다. 조건이 바뀌면 답도 바뀝니다."}], SLUG="01-model-serving-intro";
+ /* ── 용어 강조 ── */
+ function hi(){
+  if(!TERMS.length) return;
+  var SKIP=/^(SCRIPT|STYLE|CODE|PRE|CANVAS|SVG|DT|DD|TEXTAREA|INPUT|BUTTON|SELECT|A|H1|H2|H3|H4)$/;
+  var esc=function(s){return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')};
+  var rx; try{ rx=new RegExp('('+TERMS.map(esc).join('|')+')','g'); }catch(e){ return; }
+  var nodes=document.querySelectorAll('#llmso-doc p, #llmso-doc li, #llmso-doc td');
+  var seen={}, cap=0;
+  for(var i=0;i<nodes.length && cap<700;i++){
+   var el=nodes[i], sec=el.closest('section')||el.closest('.demo')||document.body;
+   if(!sec.__k) sec.__k=Math.random();
+   var key=sec.__k;
+   var w=document.createTreeWalker(el,NodeFilter.SHOW_TEXT,{acceptNode:function(n){
+     var p=n.parentElement; while(p&&p!==el){ if(SKIP.test(p.tagName)||(p.className&&String(p.className).indexOf('lsx-')===0)) return NodeFilter.FILTER_REJECT; p=p.parentElement; }
+     return n.nodeValue.trim().length>1?NodeFilter.FILTER_ACCEPT:NodeFilter.FILTER_REJECT; }});
+   var batch=[],n;
+   while(n=w.nextNode()) batch.push(n);
+   for(var j=0;j<batch.length;j++){
+    var t=batch[j], txt=t.nodeValue, hit=false, frag=document.createDocumentFragment(), last=0;
+    rx.lastIndex=0; var m;
+    while((m=rx.exec(txt))){
+     var term=m[1], k=key+'|'+term;
+     if(seen[k]) continue;
+     var pre=txt[m.index-1]||'', post=txt[m.index+term.length]||'';
+     if(/^[A-Za-z]/.test(term) && (/[A-Za-z0-9_]/.test(pre)||/[A-Za-z0-9_]/.test(post))) continue;
+     seen[k]=1; hit=true; cap++;
+     frag.appendChild(document.createTextNode(txt.slice(last,m.index)));
+     var sp=document.createElement('span'); sp.className='lsx-term'; sp.textContent=term;
+     if(DEFS[term]) sp.title=DEFS[term];
+     frag.appendChild(sp); last=m.index+term.length;
+     if(cap>=700) break;
+    }
+    if(hit){ frag.appendChild(document.createTextNode(txt.slice(last))); t.parentNode.replaceChild(frag,t); }
+   }
+  }
+ }
+ /* ── 퀴즈 ── */
+ function quiz(){
+  if(!QUIZ||!QUIZ.length) return;
+  var root=document.createElement('div'); root.id='lsx-quiz';
+  var K='llmso:quiz:'+SLUG, done=0, right=0, N=QUIZ.length;
+  root.innerHTML='<div class="qh"><h2>스스로 확인하기</h2><span class="sub">'+N+'문항 · 답을 고르면 바로 해설이 나옵니다</span></div>'+
+    '<div class="qbar"><i></i></div>'+
+    QUIZ.map(function(q,i){
+      return '<div class="qitem" data-i="'+i+'"><div class="qn">Q'+(i+1)+'</div><div class="qq"></div><div class="qopts"></div><div class="qex"></div></div>';
+    }).join('')+
+    '<div class="qdone"><div class="sc"></div><div class="cm"></div><button class="qreset">다시 풀기</button></div>';
+  var anchor=document.getElementById('lsx-foot');
+  anchor?anchor.parentNode.insertBefore(root,anchor):document.body.appendChild(root);
+  var bar=root.querySelector('.qbar i'), dn=root.querySelector('.qdone');
+  QUIZ.forEach(function(q,i){
+   var it=root.querySelector('.qitem[data-i="'+i+'"]');
+   it.querySelector('.qq').textContent=q.q;
+   var box=it.querySelector('.qopts');
+   q.o.forEach(function(txt,j){
+    var b=document.createElement('button'); b.className='qopt'; b.type='button'; b.textContent=txt;
+    b.onclick=function(){
+     var bs=box.querySelectorAll('.qopt');
+     bs.forEach(function(x){x.disabled=true});
+     bs[q.a].classList.add('ok'); bs[q.a].insertAdjacentHTML('beforeend','<span class="mk">✓</span>');
+     if(j!==q.a){ b.classList.add('no'); b.insertAdjacentHTML('beforeend','<span class="mk">✗</span>'); }
+     else right++;
+     var ex=it.querySelector('.qex'); ex.innerHTML='<b>'+(j===q.a?'정답':'오답')+'</b> — '+q.e; ex.classList.add('on');
+     done++; bar.style.width=(done/N*100)+'%';
+     if(done===N){
+      dn.classList.add('on');
+      dn.querySelector('.sc').textContent=right+' / '+N;
+      var p=right/N;
+      dn.querySelector('.cm').textContent = p===1?'전부 맞혔습니다.':p>=0.7?'대체로 이해하셨습니다. 틀린 항목의 해설만 다시 보세요.':'해설을 따라 본문의 해당 절을 다시 보시길 권합니다.';
+      try{localStorage.setItem(K,JSON.stringify({r:right,n:N}))}catch(e){}
+     }
+    };
+    box.appendChild(b);
+   });
+  });
+  root.querySelector('.qreset').onclick=function(){ location.reload(); };
+ }
+ function boot(){ try{hi()}catch(e){} try{quiz()}catch(e){} }
+ if(document.readyState==='complete') setTimeout(boot,300);
+ else addEventListener('load',function(){setTimeout(boot,300)});
+})();
+</script></body>
+</html>
