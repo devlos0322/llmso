@@ -4754,8 +4754,55 @@ window.addEventListener('load',()=>REDRAW.forEach(f=>f()));
    }catch(e){}
   });
  }
- function boot(){ try{hi()}catch(e){} try{tips()}catch(e){} try{quiz()}catch(e){}
-   setTimeout(function(){try{centerFigs()}catch(e){}},900);
+
+ /* ── 캔버스 위 드래그가 페이지 스크롤에 먹히는 문제 ──
+    원본은 모바일에서 canvas{touch-action:auto}로 완화해 손가락이 묶이지 않게 했지만,
+    그 대가로 그림 위 드래그가 브라우저 스크롤로 넘어간다.
+    원작자가 도식마다 붙여둔 .hint 문구로 조작 방식을 판별해
+    직접 조작(드래그·클릭)하는 캔버스에만 touch-action:none 을 돌려준다.
+    슬라이더·버튼형은 그대로 두어 스크롤을 잃지 않는다. */
+ function fixTouch(){
+  var RE=/드래그|끌어|잡아|클릭|탭/;
+  document.querySelectorAll('#llmso-doc canvas').forEach(function(c){
+   if(c.__lsxTouch) return;
+   var box=c.closest('.demo')||c.closest('section')||c.parentElement;
+   if(!box) return;
+   var h=box.querySelector('.hint');
+   var t=(h&&h.textContent)||'';
+   if(!RE.test(t)) return;
+   c.__lsxTouch=1;
+   c.style.setProperty('touch-action','none','important');
+   c.setAttribute('data-lsx-drag','1');
+  });
+ }
+
+ /* ── 흰 배경 위의 흰 글씨 복구 ──
+    원본에 다크 테마용 인라인 style="color:#fff" 가 남아 있어
+    밝은 배경에서 글자가 보이지 않는 곳이 있다(00b 11곳).
+    실제 배경 밝기를 따져 밝을 때만 글자색을 되돌린다. */
+ function fixContrast(){
+  function lum(v){ var m=(v||'').match(/[\d.]+/g); if(!m) return null;
+   if(m.length>3 && parseFloat(m[3])<0.1) return null;
+   return 0.2126*+m[0]+0.7152*+m[1]+0.0722*+m[2]; }
+  var n=0;
+  document.querySelectorAll('#llmso-doc [style]').forEach(function(el){
+   if(el.__lsxFixed) return;
+   if(!el.textContent || !el.textContent.trim()) return;
+   var cl=lum(getComputedStyle(el).color);
+   if(cl===null||cl<210) return;
+   var p=el, bl=null;
+   while(p && p!==document.documentElement){
+    var v=lum(getComputedStyle(p).backgroundColor);
+    if(v!==null){ bl=v; break; }
+    p=p.parentElement;
+   }
+   if(bl===null) bl=255;
+   if(bl>170){ el.style.setProperty('color','#1b2432','important'); el.__lsxFixed=1; n++; }
+  });
+  return n;
+ }
+ function boot(){ try{fixContrast()}catch(e){} try{fixTouch()}catch(e){} try{hi()}catch(e){} try{tips()}catch(e){} try{quiz()}catch(e){}
+   setTimeout(function(){try{fixTouch()}catch(e){}try{centerFigs()}catch(e){}},900);
    setTimeout(function(){try{centerFigs()}catch(e){}},2200); }
  if(document.readyState==='complete') setTimeout(boot,300);
  else addEventListener('load',function(){setTimeout(boot,300)});
