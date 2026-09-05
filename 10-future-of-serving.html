@@ -57,7 +57,7 @@ body{ padding-top:46px !important; }
   #lsx-foot a{padding:16px 18px;min-height:44px}
 }
 /* ── 가로 스크롤 도식: 발견 가능하게 ── */
-#llmso-doc .lsx-fig{position:relative}
+#llmso-doc .lsx-fig{position:relative !important;display:block !important;width:auto !important;max-width:100% !important;min-width:0 !important;float:none !important;transform:none !important;margin-left:0 !important;margin-right:0 !important}
 #llmso-doc .lsx-fig::after{
   content:"";position:absolute;top:1px;right:1px;bottom:1px;width:44px;pointer-events:none;
   background:linear-gradient(to left,rgba(255,255,255,.96),rgba(255,255,255,0));
@@ -71,12 +71,27 @@ body{ padding-top:46px !important; }
   opacity:1;transition:opacity .35s}
 #llmso-doc .lsx-fig.at-end .lsx-hint,#llmso-doc .lsx-fig.touched .lsx-hint{opacity:0}
 /* ── 모바일: 도식을 화면 폭까지 넓혀 스크롤 양을 줄인다 ── */
-@media (max-width:760px){
-  #llmso-doc .lsx-fig{width:100vw;margin-left:50%;transform:translateX(-50%)}
-  #llmso-doc .lsx-fig>.canvas-wrap{border-radius:0;border-left:0;border-right:0}
-  #llmso-doc .lsx-fig::after{border-radius:0;right:0}
-}
+/* 풀블리드는 쓰지 않는다 — 원본이 transform:none !important 를 걸어
+   translateX(-50%)가 무력화되고 margin-left:50%만 남아 도식이 밀린다. */
 @media print{ .lsx-hint,#llmso-doc .lsx-fig::after{display:none!important} }
+/* ── 용어 정의 팝오버 (터치·마우스 공용) ── */
+#llmso-doc .lsx-term{padding:1px 2px;border-radius:3px;-webkit-tap-highlight-color:transparent}
+#llmso-doc .lsx-term.on{background:rgba(192,57,43,.13);border-bottom-style:solid}
+#lsx-tip{position:fixed;z-index:1000;box-sizing:border-box;
+  width:max-content;max-width:min(340px,calc(100vw - 20px));
+  background:#1b2432;color:#fff;border-radius:11px;padding:12px 14px;
+  font:400 14px/1.62 -apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Segoe UI",Roboto,sans-serif;
+  letter-spacing:-.01em;box-shadow:0 8px 30px rgba(0,0,0,.26);
+  opacity:0;visibility:hidden;transform:translateY(4px);
+  transition:opacity .14s,transform .14s;
+  pointer-events:none}
+#lsx-tip.on{opacity:1;visibility:visible;transform:translateY(0)}
+#lsx-tip .tt{display:block;font-weight:700;color:#ff9d8f;margin-bottom:4px;font-size:13px}
+#lsx-tip::after{content:"";position:absolute;width:11px;height:11px;background:#1b2432;transform:rotate(45deg)}
+#lsx-tip[data-pos="top"]::after{bottom:-5px;left:var(--ax,24px)}
+#lsx-tip[data-pos="bottom"]::after{top:-5px;left:var(--ax,24px)}
+@media print{#lsx-tip{display:none!important}}
+
 </style>
 
 <style id="lsx-study">
@@ -3166,7 +3181,7 @@ window.addEventListener('load',()=>REDRAW.forEach(f=>f()));
      seen[k]=1; hit=true; cap++;
      frag.appendChild(document.createTextNode(txt.slice(last,m.index)));
      var sp=document.createElement('span'); sp.className='lsx-term'; sp.textContent=term;
-     if(DEFS[term]) sp.title=DEFS[term];
+     if(DEFS[term]) sp.setAttribute('data-def',DEFS[term]);
      frag.appendChild(sp); last=m.index+term.length;
      if(cap>=700) break;
     }
@@ -3215,7 +3230,59 @@ window.addEventListener('load',()=>REDRAW.forEach(f=>f()));
   });
   root.querySelector('.qreset').onclick=function(){ location.reload(); };
  }
- function boot(){ try{hi()}catch(e){} try{quiz()}catch(e){} }
+
+ /* ── 용어 정의 팝오버 ── */
+ function tips(){
+  var tip=document.getElementById('lsx-tip');
+  if(!tip){ tip=document.createElement('div'); tip.id='lsx-tip'; document.body.appendChild(tip); }
+  var cur=null;
+  var canHover=false; try{canHover=matchMedia('(hover:hover) and (pointer:fine)').matches}catch(e){}
+  function hide(){ if(cur){cur.classList.remove('on');cur=null;} tip.classList.remove('on'); }
+  function place(){
+   if(!cur) return;
+   var r=cur.getBoundingClientRect(), M=10;
+   /* 용어가 화면 밖으로 나가면 닫는다 */
+   if(r.bottom<0||r.top>innerHeight){ hide(); return; }
+   var tr=tip.getBoundingClientRect();
+   var left=Math.min(Math.max(M, r.left+r.width/2-tr.width/2), Math.max(M, innerWidth-tr.width-M));
+   var above=r.top>tr.height+18;
+   var top=above ? r.top-tr.height-9 : r.bottom+9;
+   top=Math.min(Math.max(M, top), Math.max(M, innerHeight-tr.height-M));
+   tip.setAttribute('data-pos', above?'top':'bottom');
+   tip.style.setProperty('--ax', Math.min(Math.max(12, r.left+r.width/2-left-5), Math.max(12,tr.width-22))+'px');
+   tip.style.left=left+'px'; tip.style.top=top+'px';
+  }
+  function show(el){
+   var d=el.getAttribute('data-def'); if(!d) return;
+   if(cur===el){ hide(); return; }
+   if(cur) cur.classList.remove('on');
+   cur=el; el.classList.add('on');
+   tip.innerHTML='';
+   var t=document.createElement('span'); t.className='tt'; t.textContent=el.textContent; tip.appendChild(t);
+   tip.appendChild(document.createTextNode(d));
+   tip.classList.add('on'); tip.style.left='-9999px'; tip.style.top='0px';
+   place();
+  }
+  document.addEventListener('click',function(e){
+   var el=e.target.closest && e.target.closest('.lsx-term');
+   if(el){ e.preventDefault(); e.stopPropagation(); show(el); } else hide();
+  },true);
+  if(canHover){
+   document.addEventListener('mouseover',function(e){
+    var el=e.target.closest && e.target.closest('.lsx-term'); if(el&&el!==cur) show(el);
+   });
+   document.addEventListener('mouseout',function(e){
+    var el=e.target.closest && e.target.closest('.lsx-term');
+    if(el&&el===cur&&!e.relatedTarget) hide();
+   });
+  }
+  var raf=0;
+  function follow(){ if(!cur) return; if(raf) return; raf=requestAnimationFrame(function(){raf=0;place();}); }
+  addEventListener('scroll',follow,{passive:true});
+  addEventListener('resize',function(){ if(cur) place(); });
+  addEventListener('keydown',function(e){ if(e.key==='Escape') hide(); });
+ }
+ function boot(){ try{hi()}catch(e){} try{tips()}catch(e){} try{quiz()}catch(e){} }
  if(document.readyState==='complete') setTimeout(boot,300);
  else addEventListener('load',function(){setTimeout(boot,300)});
 })();
