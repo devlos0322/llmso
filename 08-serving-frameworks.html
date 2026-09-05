@@ -4665,7 +4665,7 @@ window.addEventListener('load',()=>REDRAW.forEach(f=>f()));
    var o=document.createElement('div'); o.className='lsx-fig';
    w.parentNode.insertBefore(o,w); o.appendChild(w);
    var h=document.createElement('div'); h.className='lsx-hint';
-   h.textContent='옆으로 밀어보세요 →'; o.appendChild(h);
+   h.textContent='← 좌우로 밀어보세요 →'; o.appendChild(h);
    function up(){
      var end=w.scrollLeft+w.clientWidth>=w.scrollWidth-4;
      o.classList.toggle('at-end',end);
@@ -4811,7 +4811,45 @@ window.addEventListener('load',()=>REDRAW.forEach(f=>f()));
   addEventListener('resize',function(){ if(cur) place(); });
   addEventListener('keydown',function(e){ if(e.key==='Escape') hide(); });
  }
- function boot(){ try{hi()}catch(e){} try{tips()}catch(e){} try{quiz()}catch(e){} }
+
+ /* ── 가로 스크롤 도식: 좌표축이 있는 그래프만 중앙 정렬 ──
+    세로로 길게 이어진 진한 선(=축)을 찾아 그 열을 화면 가운데 둔다.
+    축이 없으면(흐름도·표) 원본대로 왼쪽에서 시작한다. */
+ function centerFigs(){
+  document.querySelectorAll('#llmso-doc .lsx-fig > .canvas-wrap').forEach(function(w){
+   if(w.__lsxCentered) return;
+   var max=w.scrollWidth-w.clientWidth;
+   if(max<=4) return;
+   w.__lsxCentered=1;
+   var c=w.querySelector('canvas'); if(!c||!c.width) return;
+   try{
+    var ctx=c.getContext('2d'), W=c.width, H=c.height;
+    var sx=Math.max(1,Math.round(W/420)), sy=Math.max(1,Math.round(H/220));
+    var d=ctx.getImageData(0,0,W,H).data;
+    var n=Math.ceil(W/sx), rows=0, cov=new Float64Array(n);
+    for(var y=0;y<H;y+=sy){
+     rows++;
+     for(var x=0,ci=0;x<W;x+=sx,ci++){
+      var i=((y*W)+x)*4;
+      if(d[i+3] && (255-Math.min(d[i],d[i+1],d[i+2]))>70) cov[ci]++;
+     }
+    }
+    if(!rows) return;
+    /* 가장자리 10%는 테두리일 수 있으니 제외 */
+    var lo=Math.floor(n*0.10), hi=Math.ceil(n*0.90), best=-1, bestV=0;
+    for(var k=lo;k<hi;k++){ var v=cov[k]/rows; if(v>bestV){bestV=v;best=k;} }
+    if(best<0 || bestV<0.72) return;           /* 축 없음 → 왼쪽 유지 */
+    var cssW=c.getBoundingClientRect().width||W;
+    var target=(best*sx)*(cssW/W)-w.clientWidth/2;
+    w.scrollLeft=Math.max(0,Math.min(max,Math.round(target)));
+    var o=w.parentElement;
+    if(o) o.classList.toggle('at-end', w.scrollLeft+w.clientWidth>=w.scrollWidth-4);
+   }catch(e){}
+  });
+ }
+ function boot(){ try{hi()}catch(e){} try{tips()}catch(e){} try{quiz()}catch(e){}
+   setTimeout(function(){try{centerFigs()}catch(e){}},900);
+   setTimeout(function(){try{centerFigs()}catch(e){}},2200); }
  if(document.readyState==='complete') setTimeout(boot,300);
  else addEventListener('load',function(){setTimeout(boot,300)});
 })();
